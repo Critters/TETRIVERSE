@@ -78,6 +78,8 @@ func uiInit() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	uiMenuInit()
 }
 
 func uiUpdate() {
@@ -105,10 +107,15 @@ func drawDebug(screen *ebiten.Image) {
 
 func drawBackground(screen *ebiten.Image) {
 	// Game Frame
-	DrawOutlinedRect(screen, float32(GameWindowOffsetX), float32(GameWindowOffsetY), float32(GameWindowWidth), float32(GameWindowHeight), getColor(3), getColor(0))
+	drawOutlinedRect(screen, float32(GameWindowOffsetX), float32(GameWindowOffsetY), float32(GameWindowWidth), float32(GameWindowHeight), getColor(3), getColor(0))
 }
 
-func DrawOutlinedRect(screen *ebiten.Image, x float32, y float32, width float32, height float32, border color.RGBA, fill color.RGBA) {
+func drawOutlinedRect(screen *ebiten.Image, x float32, y float32, width float32, height float32, border color.RGBA, fill color.RGBA) {
 	vector.DrawFilledRect(screen, x, y, width, height, border, false)
 	vector.DrawFilledRect(screen, x+1, y+1, width-2, height-2, fill, false)
+}
+
+func drawBlock(screen *ebiten.Image, x float32, y float32, state int) {
+	// 0: inactive 2: highlighted 3: blocking
+	vector.DrawFilledRect(screen, x, y, 8, 8, getColor(state), false)
 }
