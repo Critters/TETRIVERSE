@@ -79,7 +79,7 @@ func uiInit() {
 		log.Fatal(err)
 	}
 
-	uiMenuInit()
+	menuInit()
 }
 
 func uiUpdate() {
@@ -117,5 +117,5 @@ func drawOutlinedRect(screen *ebiten.Image, x float32, y float32, width float32,
 
 func drawBlock(screen *ebiten.Image, x float32, y float32, state int) {
 	// 0: inactive 2: highlighted 3: blocking
-	vector.DrawFilledRect(screen, x, y, 8, 8, getColor(state), false)
+	vector.DrawFilledRect(screen, x, y, 7, 7, getColor(state), false)
 }

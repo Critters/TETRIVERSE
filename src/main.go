@@ -10,7 +10,7 @@ import (
 type Game struct {
 }
 
-var currentScreen = 0
+var currentScreen = 1
 
 const (
 	menuScreen int = iota
@@ -24,8 +24,12 @@ const (
 )
 
 func (g *Game) Update() error {
-	uiUpdate()
-	uiMenuUpdate()
+	switch currentScreen {
+	case menuScreen:
+		menuUpdate()
+	case gameScreen:
+		gameUpdate()
+	}
 	return nil
 }
 
@@ -33,9 +37,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	vector.DrawFilledRect(screen, 0, 0, float32(GameWidth), float32(GameHeight), getColor(0), false)
 	switch currentScreen {
 	case menuScreen:
-		uiMenuDraw(screen)
+		menuDraw(screen)
 	case gameScreen:
-		drawBackground(screen)
+		gameDraw(screen)
 	}
 	drawDebug(screen)
 
@@ -46,6 +50,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func main() {
+	gameInit()
 	uiInit()
 	ebiten.SetWindowSize(int(GameWidth)*4, int(GameHeight)*4)
 	ebiten.SetWindowTitle("Hello, World!")

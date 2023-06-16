@@ -11,18 +11,19 @@ import (
 
 var highlighted int = 0
 var uiVisualImage *ebiten.Image
-var uiVisualMatrix [18]int
+var uiVisualMatrix [200]int
 
-func uiMenuInit() {
+func menuInit() {
 	uiVisualImage = ebiten.NewImage(128, 64)
-	uiVisualMatrix = [18]int{
+	uiVisualMatrix = [200]int{
 		1, 0, 1, 0, 0, 0,
 		1, 1, 1, 1, 1, 0,
 		1, 1, 1, 1, 1, 0}
+	//logicInit(uiVisualMatrix)
 }
 
 // W & S change which menu item is highlighted
-func uiMenuUpdate() {
+func menuUpdate() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
 		highlighted--
 	}
@@ -37,17 +38,17 @@ func uiMenuUpdate() {
 	highlighted = highlighted % 3
 }
 
-func uiMenuDraw(screen *ebiten.Image) {
+func menuDraw(screen *ebiten.Image) {
 	// The three options: Play, Options, Credits
 	var col color.RGBA = getColor(1)
 	var dotX int = 60
 	var dotY int = 64
 	if highlighted == 0 {
 		col = getColor(3)
-		uiVisualMatrix = [18]int{
-			2, 0, 1, 0, 0, 0,
-			2, 1, 1, 1, 1, 0,
-			2, 2, 1, 1, 1, 0}
+		/*uiVisualMatrix = [18]int{
+		2, 0, 1, 0, 0, 0,
+		2, 1, 1, 1, 1, 0,
+		2, 2, 1, 1, 1, 0}*/
 	}
 	text.Draw(screen, "PLAY", fontEarlyGameBoy, 60, 64, col)
 	col = getColor(1)
@@ -55,10 +56,10 @@ func uiMenuDraw(screen *ebiten.Image) {
 		dotX = 48
 		dotY = 80
 		col = getColor(3)
-		uiVisualMatrix = [18]int{
-			1, 0, 2, 0, 0, 0,
-			1, 2, 2, 1, 1, 0,
-			1, 1, 2, 1, 1, 0}
+		/*uiVisualMatrix = [18]int{
+		1, 0, 2, 0, 0, 0,
+		1, 2, 2, 1, 1, 0,
+		1, 1, 2, 1, 1, 0}*/
 	}
 	text.Draw(screen, "OPTIONS", fontEarlyGameBoy, 48, 80, col)
 	col = getColor(1)
@@ -66,10 +67,10 @@ func uiMenuDraw(screen *ebiten.Image) {
 		dotX = 48
 		dotY = 96
 		col = getColor(3)
-		uiVisualMatrix = [18]int{
-			1, 0, 1, 0, 0, 0,
-			1, 1, 1, 2, 2, 0,
-			1, 1, 1, 2, 2, 0}
+		/*uiVisualMatrix = [18]int{
+		1, 0, 1, 0, 0, 0,
+		1, 1, 1, 2, 2, 0,
+		1, 1, 1, 2, 2, 0}*/
 	}
 	text.Draw(screen, "CREDITS", fontEarlyGameBoy, 48, 96, col)
 
