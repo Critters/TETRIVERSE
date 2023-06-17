@@ -24,6 +24,7 @@ const (
 )
 
 func (g *Game) Update() error {
+	uiUpdate()
 	switch currentScreen {
 	case menuScreen:
 		menuUpdate()

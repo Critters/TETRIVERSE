@@ -34,7 +34,7 @@ func getColor(index int) color.RGBA {
 }
 
 var (
-	currentPallette int = 3
+	currentPallette int = 0
 	colorPallettes  []palette
 )
 
@@ -45,24 +45,28 @@ func uiInit() {
 		{70, 135, 143, 255},
 		{148, 227, 68, 255},
 		{226, 243, 228, 255},
+		{218, 52, 103, 255},
 	}
 	colorPallettes[1] = []color.RGBA{
 		{53, 51, 63, 255},
 		{218, 52, 103, 255},
 		{255, 164, 154, 255},
 		{241, 224, 205, 255},
+		{218, 52, 103, 255},
 	}
 	colorPallettes[2] = []color.RGBA{
 		{124, 63, 8, 255},
 		{235, 107, 111, 255},
 		{249, 168, 117, 255},
 		{255, 246, 211, 255},
+		{218, 52, 103, 255},
 	}
 	colorPallettes[3] = []color.RGBA{
 		{15, 15, 27, 255},
 		{86, 90, 117, 255},
 		{198, 183, 190, 255},
 		{250, 251, 246, 255},
+		{218, 52, 103, 255},
 	}
 	tt, err := opentype.ParseReaderAt(bytes.NewReader(fontEarlyGameBoy_embed))
 	if err != nil {
@@ -103,6 +107,7 @@ func drawDebug(screen *ebiten.Image) {
 	vector.DrawFilledRect(screen, 50, 1, 4, 4, getColor(1), false)
 	vector.DrawFilledRect(screen, 54, 1, 4, 4, getColor(2), false)
 	vector.DrawFilledRect(screen, 58, 1, 4, 4, getColor(3), false)
+	vector.DrawFilledRect(screen, 62, 1, 4, 4, getColor(4), false)
 }
 
 func drawBackground(screen *ebiten.Image) {
