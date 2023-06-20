@@ -1,3 +1,7 @@
+/*
+Contains the logic and rendering for the main menu
+*/
+
 package main
 
 import (
@@ -18,67 +22,94 @@ func menuInit() {
 	uiVisualMatrix = [200]int{
 		1, 0, 1, 0, 0, 0,
 		1, 1, 1, 1, 1, 0,
-		1, 1, 1, 1, 1, 0}
+		1, 1, 1, 1, 1, 1}
 	//logicInit(uiVisualMatrix)
 }
 
 // W & S change which menu item is highlighted
 func menuUpdate() {
+	// Keyboard
 	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
 		highlighted--
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyS) {
 		highlighted++
 	}
+	// Mouse
+	var cursorX, cursorY = ebiten.CursorPosition()
+	if cursorX > 54 && cursorX < 110 {
+		if cursorY > 52 && cursorY < 62 {
+			highlighted = 0
+		}
+		if cursorY > 61 && cursorY < 74 {
+			highlighted = 1
+		}
+		if cursorY > 73 && cursorY < 86 {
+			highlighted = 2
+		}
+		if cursorY > 85 && cursorY < 98 {
+			highlighted = 3
+		}
+	}
 	// Wraps around when pressing W on the top menu item
 	if highlighted < 0 {
-		highlighted = 2
+		highlighted = 3
 	}
 	// Wraps around when pressing S on the bottom menu item
-	highlighted = highlighted % 3
+	highlighted = highlighted % 4
 }
 
 func menuDraw(screen *ebiten.Image) {
-	// The three options: Play, Options, Credits
+	// The four options: Puzzle, Arcade, Options, Credits
 	var col color.RGBA = getColor(1)
-	var dotX int = 60
-	var dotY int = 64
+	var dotX int = 56
+	var dotY int = 60
 	if highlighted == 0 {
 		col = getColor(3)
-		/*uiVisualMatrix = [18]int{
-		2, 0, 1, 0, 0, 0,
-		2, 1, 1, 1, 1, 0,
-		2, 2, 1, 1, 1, 0}*/
+		uiVisualMatrix = [200]int{
+			0, 0, 1, 0, 0, 0,
+			3, 3, 1, 1, 1, 0,
+			3, 3, 1, 1, 1, 1}
 	}
-	text.Draw(screen, "PLAY", fontEarlyGameBoy, 60, 64, col)
+	text.Draw(screen, "PUZZLES", fontEarlyGameBoy, 56, 60, col)
+
 	col = getColor(1)
 	if highlighted == 1 {
-		dotX = 48
-		dotY = 80
+		dotY = 72
 		col = getColor(3)
-		/*uiVisualMatrix = [18]int{
-		1, 0, 2, 0, 0, 0,
-		1, 2, 2, 1, 1, 0,
-		1, 1, 2, 1, 1, 0}*/
+		uiVisualMatrix = [200]int{
+			0, 0, 3, 0, 0, 0,
+			3, 3, 3, 1, 1, 0,
+			1, 1, 1, 1, 1, 1}
 	}
-	text.Draw(screen, "OPTIONS", fontEarlyGameBoy, 48, 80, col)
+	text.Draw(screen, "ENDLESS", fontEarlyGameBoy, 56, 72, col)
+
 	col = getColor(1)
 	if highlighted == 2 {
-		dotX = 48
+		dotY = 84
+		col = getColor(3)
+		uiVisualMatrix = [200]int{
+			0, 0, 3, 0, 0, 0,
+			1, 3, 3, 3, 1, 0,
+			1, 1, 1, 1, 1, 1}
+	}
+	text.Draw(screen, "OPTIONS", fontEarlyGameBoy, 56, 84, col)
+	col = getColor(1)
+	if highlighted == 3 {
 		dotY = 96
 		col = getColor(3)
-		/*uiVisualMatrix = [18]int{
-		1, 0, 1, 0, 0, 0,
-		1, 1, 1, 2, 2, 0,
-		1, 1, 1, 2, 2, 0}*/
+		uiVisualMatrix = [200]int{
+			0, 0, 1, 0, 0, 0,
+			1, 1, 1, 3, 3, 0,
+			1, 1, 1, 1, 3, 3}
 	}
-	text.Draw(screen, "CREDITS", fontEarlyGameBoy, 48, 96, col)
+	text.Draw(screen, "CREDITS", fontEarlyGameBoy, 56, 96, col)
 
 	// The dot
-	vector.DrawFilledCircle(screen, float32(dotX-6), float32(dotY-300), 4, getColor(1), false)
+	vector.DrawFilledCircle(screen, float32(dotX-8), float32(dotY-3000), 4, getColor(3), false)
 
 	// The visualization
-	var visX int = 48
+	var visX int = 56
 	var visY int = 112
 	var dio *ebiten.DrawImageOptions = &ebiten.DrawImageOptions{}
 	dio.GeoM.Translate(float64(visX), float64(visY))

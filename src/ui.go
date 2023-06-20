@@ -1,3 +1,7 @@
+/*
+Contains some common UI elements used by the menu + game
+*/
+
 package main
 
 import (
@@ -103,6 +107,9 @@ func uiUpdate() {
 
 func drawDebug(screen *ebiten.Image) {
 	text.Draw(screen, fmt.Sprint(math.Floor(ebiten.ActualFPS())), fontEarlyGameBoy, 1, 8, getColor(1))
+	var cursorX, cursorY = ebiten.CursorPosition()
+	text.Draw(screen, fmt.Sprint(cursorX, ", ", cursorY), fontEarlyGameBoy, 1, 16, getColor(1))
+
 	vector.DrawFilledRect(screen, 46, 1, 4, 4, getColor(0), false)
 	vector.DrawFilledRect(screen, 50, 1, 4, 4, getColor(1), false)
 	vector.DrawFilledRect(screen, 54, 1, 4, 4, getColor(2), false)
@@ -110,10 +117,12 @@ func drawDebug(screen *ebiten.Image) {
 	vector.DrawFilledRect(screen, 62, 1, 4, 4, getColor(4), false)
 }
 
+/*
 func drawBackground(screen *ebiten.Image) {
 	// Game Frame
 	drawOutlinedRect(screen, float32(GameWindowOffsetX), float32(GameWindowOffsetY), float32(GameWindowWidth), float32(GameWindowHeight), getColor(3), getColor(0))
 }
+*/
 
 func drawOutlinedRect(screen *ebiten.Image, x float32, y float32, width float32, height float32, border color.RGBA, fill color.RGBA) {
 	vector.DrawFilledRect(screen, x, y, width, height, border, false)
