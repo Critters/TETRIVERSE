@@ -155,7 +155,7 @@ func drawDebug(screen *ebiten.Image) {
 	vector.DrawFilledRect(screen, 9, 146, 4, 5, getColor(2), false)
 	vector.DrawFilledRect(screen, 13, 146, 4, 5, getColor(3), false)
 	vector.DrawFilledRect(screen, 17, 146, 4, 5, getColor(4), false)
-	text.Draw(screen, "WASD QR SPACE (or mouse)", fontTkachevica, 22, 151, color.NRGBA{128, 128, 128, 255})
+	text.Draw(screen, "WASD, R, SPACE (or mouse)", fontTkachevica, 22, 151, color.NRGBA{128, 128, 128, 255})
 }
 
 /*

@@ -10,7 +10,7 @@ import (
 type Game struct {
 }
 
-var currentScreen = 1
+var currentScreen = 0
 
 const (
 	menuScreen int = iota

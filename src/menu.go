@@ -62,7 +62,7 @@ func menuUpdate() {
 func menuDraw(screen *ebiten.Image) {
 	// The four options: Puzzle, Arcade, Options, Credits
 	var col color.NRGBA = getColor(1)
-	var dotX int = 56
+	var dotX int = 60
 	var dotY int = 60
 	if highlighted == 0 {
 		col = getColor(3)
@@ -71,10 +71,11 @@ func menuDraw(screen *ebiten.Image) {
 			3, 3, 1, 1, 1, 0,
 			3, 3, 1, 1, 1, 1}
 	}
-	text.Draw(screen, "PUZZLES", fontEarlyGameBoy, 56, 60, col)
+	text.Draw(screen, "PUZZLE", fontEarlyGameBoy, 60, 60, col)
 
 	col = getColor(1)
 	if highlighted == 1 {
+		dotX = 56
 		dotY = 72
 		col = getColor(3)
 		uiVisualMatrix = [200]int{
@@ -86,6 +87,7 @@ func menuDraw(screen *ebiten.Image) {
 
 	col = getColor(1)
 	if highlighted == 2 {
+		dotX = 68
 		dotY = 84
 		col = getColor(3)
 		uiVisualMatrix = [200]int{
@@ -93,9 +95,10 @@ func menuDraw(screen *ebiten.Image) {
 			1, 3, 3, 3, 1, 0,
 			1, 1, 1, 1, 1, 1}
 	}
-	text.Draw(screen, "OPTIONS", fontEarlyGameBoy, 56, 84, col)
+	text.Draw(screen, "HELP", fontEarlyGameBoy, 68, 84, col)
 	col = getColor(1)
 	if highlighted == 3 {
+		dotX = 56
 		dotY = 96
 		col = getColor(3)
 		uiVisualMatrix = [200]int{
