@@ -106,7 +106,7 @@ func uiUpdate() {
 }
 
 func drawDebug(screen *ebiten.Image) {
-	text.Draw(screen, fmt.Sprint(math.Floor(ebiten.ActualFPS())), fontEarlyGameBoy, 1, 8, getColor(1))
+	text.Draw(screen, fmt.Sprint(math.Floor(ebiten.ActualFPS()), "fps"), fontEarlyGameBoy, 1, 8, getColor(1))
 	var cursorX, cursorY = ebiten.CursorPosition()
 	text.Draw(screen, fmt.Sprint(cursorX, ", ", cursorY), fontEarlyGameBoy, 1, 16, getColor(1))
 

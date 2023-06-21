@@ -7,11 +7,17 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
+	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
+
+var t int = 0
+var gameState int = 0 // 0:Normal 1:Level complete (FF)
+var currentLevel int = 0
 
 // The 20x10 board
 var boardMatrix [200]int
@@ -23,21 +29,21 @@ var boardImage *ebiten.Image = ebiten.NewImage(70, 140)
 This is an over optimization for this game, but redrawBoardImage is only set
 to true when the boardImage needs to be redrawn, which in this game is very
 infrequent. This only gets set to true when the player moves or rotates the shape
-or when blocks move up after getting selected, whcih is twice a second. On a high
+or when blocks move up after getting selected, which is twice a second. On a high
 end PC this optimization increased the average FPS from 150 to 190 (26% improvement)
 */
 var redrawBoardImage bool = true
 
-var boardShapes []int
-var t int = 0
+var upcomingShapes []int
+var upcomingShapesImage *ebiten.Image = ebiten.NewImage(32, 128)
+var redrawUpcomingShapesImage bool = true
 
 // The 3x3 matrix of a shape
-type shape [9]int
-
 // The 4 rotations of a shape
+// All rotations of all shapes
+type shape [9]int
 type shapes [4]shape
 
-// All rotations of all shapes
 var possibleShapes []shapes
 
 // The shape currently selected, it's position on the board, and its rotation
@@ -91,22 +97,54 @@ func gameInit() {
 		{0, 0, 0, 1, 1, 0, 0, 1, 1},
 		{0, 1, 0, 1, 1, 0, 1, 0, 0}} // Other Z
 
-	loadLevel(0)
+	LoadLevel(currentLevel)
 }
 
-func loadLevel(level int) {
+func LoadLevel(level int) {
+	fmt.Println("LoadLevel(", level, ")")
+	currentLevel = level
 	var jsonFile JsonFile
 	json.Unmarshal(levelFile, &jsonFile)
-	boardMatrix = jsonFile.Levels[level].Start
-	boardShapes = jsonFile.Levels[level].Shapes
+	boardMatrix = jsonFile.Levels[currentLevel].Start
+	upcomingShapes = jsonFile.Levels[currentLevel].Shapes
+	PopShape()
+}
+
+// Removes the top shape from the list and makes it the current
+func PopShape() {
+	if len(upcomingShapes) > 0 {
+		currentShape = upcomingShapes[0]
+		shapeRotation = 0
+		upcomingShapes = upcomingShapes[1:]
+		redrawUpcomingShapesImage = true
+	} else {
+		// No more shapes left
+		currentShape = -1
+		redrawUpcomingShapesImage = true
+		gameState = 1
+	}
+}
+
+func NextLevel() {
+	LoadLevel(currentLevel + 1)
+	gameState = 0
 }
 
 var oldX, oldY int
 
 func gameUpdate() {
 	t++
-	if t%30 == 0 {
-		raiseShapes()
+	if gameState == 0 {
+		if t%30 == 0 {
+			raiseShapes()
+		}
+	} else if gameState == 1 {
+		if t%5 == 0 {
+			raisedSomething := raiseShapes()
+			if !raisedSomething {
+				NextLevel()
+			}
+		}
 	}
 
 	// Mouse
@@ -168,32 +206,34 @@ func gameUpdate() {
 		}
 		redrawBoardImage = true
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+	/*if inpututil.IsKeyJustPressed(ebiten.KeyR) {
 		currentShape++
 		currentShape = currentShape % 5
 		redrawBoardImage = true
-	}
+	}*/
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		extractShape(shapeX, shapeY, currentShape, shapeRotation)
 		redrawBoardImage = true
 	}
 
 	// Ensure the shape does not go off the right or bottom edges of the board
-	var shape = possibleShapes[currentShape][shapeRotation]
-	// Right
-	if shapeX >= 8 {
-		if shape[2] == 0 && shape[5] == 0 && shape[8] == 0 {
-			shapeX = 8
-		} else {
-			shapeX = 7
+	if currentShape > -1 {
+		var shape = possibleShapes[currentShape][shapeRotation]
+		// Right
+		if shapeX >= 8 {
+			if shape[2] == 0 && shape[5] == 0 && shape[8] == 0 {
+				shapeX = 8
+			} else {
+				shapeX = 7
+			}
 		}
-	}
-	// Bottom
-	if shapeY >= 18 {
-		if shape[6] == 0 && shape[7] == 0 && shape[8] == 0 {
-			shapeY = 18
-		} else {
-			shapeY = 17
+		// Bottom
+		if shapeY >= 18 {
+			if shape[6] == 0 && shape[7] == 0 && shape[8] == 0 {
+				shapeY = 18
+			} else {
+				shapeY = 17
+			}
 		}
 	}
 
@@ -204,8 +244,12 @@ func gameUpdate() {
 }
 
 func gameDraw(screen *ebiten.Image) {
-	// Frame
+	// Frames
 	drawOutlinedRect(screen, 63, 0, 71, 141, getColor(3), getColor(0))
+	text.Draw(screen, "NEXT", fontEarlyGameBoy, 8, 31, getColor(1))
+	drawOutlinedRect(screen, 8, 32, 34, 32, getColor(3), getColor(0))
+	drawOutlinedRect(screen, 8, 63, 34, 128, getColor(3), getColor(0))
+
 	if redrawBoardImage {
 		vector.DrawFilledRect(screen, 0, 0, 6, 6, getColor(4), false)
 		// Board
@@ -217,21 +261,35 @@ func gameDraw(screen *ebiten.Image) {
 		drawShape(boardImage, shapeX, shapeY, currentShape, shapeRotation, true)
 		redrawBoardImage = false
 	}
+
+	if redrawUpcomingShapesImage {
+		upcomingShapesImage.Clear()
+		for i := range upcomingShapes {
+			drawShape(upcomingShapesImage, 1, 1+(i*4), upcomingShapes[i], shapeRotation, false)
+		}
+		redrawUpcomingShapesImage = false
+	}
+
 	// Compile
 	var dio *ebiten.DrawImageOptions = &ebiten.DrawImageOptions{}
-	dio.GeoM.Translate(64, 1)
-	screen.DrawImage(boardImage, dio)
+	dio.GeoM.Translate(9, 33)
+	screen.DrawImage(upcomingShapesImage, dio)
 
+	dio.GeoM.Translate(64-9, 1-33)
+	screen.DrawImage(boardImage, dio)
 }
 
 func drawShape(screen *ebiten.Image, posX int, posY int, shapeID int, shapeRotation int, checkValid bool) {
+	if shapeID == -1 {
+		return
+	}
 	var shape = possibleShapes[shapeID][shapeRotation]
 	for x := 0; x < 3; x++ {
 		for y := 0; y < 3; y++ {
 			if shape[x+((y%3)*3)] == 1 {
 				// White
 				var col = getColor(3)
-				if (posX+x)+((posY+y)*10) < 199 && boardMatrix[(posX+x)+((posY+y)*10)] == 0 {
+				if checkValid && (posX+x)+((posY+y)*10) < 199 && boardMatrix[(posX+x)+((posY+y)*10)] == 0 {
 					// Red
 					col = getColor(4)
 				}
@@ -252,11 +310,15 @@ func extractShape(posX int, posY int, shapeID int, shapeRotation int) {
 				}
 			}
 		}
+		PopShape()
 	}
 }
 
 // Checks if the shape can be extracted
 func checkShape(posX int, posY int, shapeID int, shapeRotation int) bool {
+	if shapeID == -1 {
+		return false
+	}
 	// Reset board to white
 	for i := 0; i < 200; i++ {
 		if boardMatrix[i] == 4 {
@@ -294,9 +356,11 @@ func checkShape(posX int, posY int, shapeID int, shapeRotation int) bool {
 	return extractable
 }
 
-func raiseShapes() {
+func raiseShapes() (raisedSomething bool) {
+	raisedSomething = false
 	for i := 0; i < 200; i++ {
 		if boardMatrix[i] == 2 {
+			raisedSomething = true
 			boardMatrix[i] = 0
 			if i-10 > 0 {
 				boardMatrix[i-10] = 2
@@ -304,4 +368,5 @@ func raiseShapes() {
 		}
 	}
 	redrawBoardImage = true
+	return raisedSomething
 }
