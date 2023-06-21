@@ -20,7 +20,7 @@ const (
 
 const (
 	GameWidth  int = 160
-	GameHeight int = 144
+	GameHeight int = 152
 )
 
 func (g *Game) Update() error {

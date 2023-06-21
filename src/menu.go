@@ -61,7 +61,7 @@ func menuUpdate() {
 
 func menuDraw(screen *ebiten.Image) {
 	// The four options: Puzzle, Arcade, Options, Credits
-	var col color.RGBA = getColor(1)
+	var col color.NRGBA = getColor(1)
 	var dotX int = 56
 	var dotY int = 60
 	if highlighted == 0 {

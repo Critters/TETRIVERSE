@@ -31,10 +31,15 @@ const (
 var fontEarlyGameBoy_embed []byte
 var fontEarlyGameBoy font.Face
 
-type palette []color.RGBA
+//go:embed assets/Tkachevica-4pxRegular.ttf
+var fontTkachevica_embed []byte
+var fontTkachevica font.Face
 
-func getColor(index int) color.RGBA {
-	return colorPallettes[currentPallette][index]
+type palette []color.NRGBA
+
+func getColor(index int) color.NRGBA {
+	col := colorPallettes[currentPallette][index]
+	return col
 }
 
 var (
@@ -43,42 +48,63 @@ var (
 )
 
 func uiInit() {
-	colorPallettes = make([]palette, 4)
-	colorPallettes[0] = []color.RGBA{
+	colorPallettes = make([]palette, 5)
+	colorPallettes[0] = []color.NRGBA{
 		{51, 44, 80, 255},
 		{70, 135, 143, 255},
 		{148, 227, 68, 255},
 		{226, 243, 228, 255},
 		{218, 52, 103, 255},
 	}
-	colorPallettes[1] = []color.RGBA{
+	colorPallettes[1] = []color.NRGBA{
 		{15, 15, 27, 255},
 		{86, 90, 117, 255},
 		{198, 183, 190, 255},
 		{250, 251, 246, 255},
 		{218, 52, 103, 255},
 	}
-	colorPallettes[2] = []color.RGBA{
+	colorPallettes[2] = []color.NRGBA{
 		{0, 0, 0, 255},
 		{108, 115, 82, 255},
 		{142, 153, 111, 255},
 		{196, 208, 160, 255},
 		{218, 52, 103, 255},
 	}
-	colorPallettes[3] = []color.RGBA{
+	colorPallettes[3] = []color.NRGBA{
 		{33, 11, 27, 255},
 		{77, 34, 44, 255},
 		{157, 101, 76, 255},
 		{207, 171, 81, 255},
 		{218, 52, 103, 255},
 	}
+	colorPallettes[4] = []color.NRGBA{
+		{22, 11, 27, 255},
+		{56, 40, 67, 255},
+		{124, 109, 128, 255},
+		{199, 198, 198, 255},
+		{218, 52, 103, 255},
+	}
+
+	const dpi = 72
+
 	tt, err := opentype.ParseReaderAt(bytes.NewReader(fontEarlyGameBoy_embed))
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	const dpi = 72
 	fontEarlyGameBoy, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    8,
+		DPI:     dpi,
+		Hinting: font.HintingVertical,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tt, err = opentype.ParseReaderAt(bytes.NewReader(fontTkachevica_embed))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fontTkachevica, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    8,
 		DPI:     dpi,
 		Hinting: font.HintingVertical,
@@ -111,18 +137,25 @@ func uiUpdate() {
 		redrawBoardImage = true
 		redrawUpcomingShapesImage = true
 	}
+	if inpututil.IsKeyJustPressed(ebiten.Key5) {
+		currentPallette = 4
+		redrawBoardImage = true
+		redrawUpcomingShapesImage = true
+	}
 }
 
 func drawDebug(screen *ebiten.Image) {
-	text.Draw(screen, fmt.Sprint(math.Floor(ebiten.ActualFPS()), "fps"), fontEarlyGameBoy, 1, 8, getColor(1))
+	text.Draw(screen, fmt.Sprint(math.Floor(ebiten.ActualFPS()), "fps"), fontTkachevica, 1, 8, getColor(1))
 	var cursorX, cursorY = ebiten.CursorPosition()
-	text.Draw(screen, fmt.Sprint(cursorX, ", ", cursorY), fontEarlyGameBoy, 1, 16, getColor(1))
+	text.Draw(screen, fmt.Sprint(cursorX, ", ", cursorY), fontTkachevica, 1, 16, getColor(1))
 
-	vector.DrawFilledRect(screen, 46, 1, 4, 4, getColor(0), false)
-	vector.DrawFilledRect(screen, 50, 1, 4, 4, getColor(1), false)
-	vector.DrawFilledRect(screen, 54, 1, 4, 4, getColor(2), false)
-	vector.DrawFilledRect(screen, 58, 1, 4, 4, getColor(3), false)
-	vector.DrawFilledRect(screen, 62, 1, 4, 4, getColor(4), false)
+	vector.DrawFilledRect(screen, 0, 145, 160, 8, color.NRGBA{0, 0, 0, 255}, false)
+	vector.DrawFilledRect(screen, 1, 146, 4, 5, getColor(0), false)
+	vector.DrawFilledRect(screen, 5, 146, 4, 5, getColor(1), false)
+	vector.DrawFilledRect(screen, 9, 146, 4, 5, getColor(2), false)
+	vector.DrawFilledRect(screen, 13, 146, 4, 5, getColor(3), false)
+	vector.DrawFilledRect(screen, 17, 146, 4, 5, getColor(4), false)
+	text.Draw(screen, "WASD QR SPACE (or mouse)", fontTkachevica, 22, 151, color.NRGBA{128, 128, 128, 255})
 }
 
 /*
@@ -132,7 +165,7 @@ func drawBackground(screen *ebiten.Image) {
 }
 */
 
-func drawOutlinedRect(screen *ebiten.Image, x float32, y float32, width float32, height float32, border color.RGBA, fill color.RGBA) {
+func drawOutlinedRect(screen *ebiten.Image, x float32, y float32, width float32, height float32, border color.NRGBA, fill color.NRGBA) {
 	vector.DrawFilledRect(screen, x, y, width, height, border, false)
 	vector.DrawFilledRect(screen, x+1, y+1, width-2, height-2, fill, false)
 }
