@@ -7,22 +7,19 @@ Windows Build: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" -o ..
 
 ## Credits
 - Early GameBoy font: https://www.dafont.com/early-gameboy.font
-- Kirokaze Gameboy Palette: https://lospec.com/palette-list/kirokaze-gameboy
-- GB Mbius Palette: https://lospec.com/palette-list/gb-mbius
-- Ice Cream GB Palette: https://lospec.com/palette-list/ice-cream-gb
 - Hollow Palette: https://lospec.com/palette-list/hollow
 
 ## Todo
 - [x] Let the shapes go to the edges
 - [x] Visualize the blocks preventing a shape from getting extracted
 - [ ] Green shapes moving up should draw over everything
-- [ ] Pulse blockign shapes
+- [ ] Pulse blocking shapes
 - [ ] Add single block "shape"
-- [ ] Show upcomming shapes
-- [ ] Switch which of the upcomming shapes you are placing
+- [x] Show upcoming shapes
+- [x] Switch which of the upcoming shapes you are placing
 - [x] Block placing if trapped under another block
 - [ ] Add new lines
 - [ ] Score
-- [ ] Reset
-- [ ] Holding key joggs shape
+- [x] Reset
+- [ ] Holding key jogs shape
 - [x] Mouse control that plays nicely with keyboard controls

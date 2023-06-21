@@ -52,24 +52,24 @@ func uiInit() {
 		{218, 52, 103, 255},
 	}
 	colorPallettes[1] = []color.RGBA{
-		{53, 51, 63, 255},
-		{218, 52, 103, 255},
-		{255, 164, 154, 255},
-		{241, 224, 205, 255},
-		{218, 52, 103, 255},
-	}
-	colorPallettes[2] = []color.RGBA{
-		{124, 63, 8, 255},
-		{235, 107, 111, 255},
-		{249, 168, 117, 255},
-		{255, 246, 211, 255},
-		{218, 52, 103, 255},
-	}
-	colorPallettes[3] = []color.RGBA{
 		{15, 15, 27, 255},
 		{86, 90, 117, 255},
 		{198, 183, 190, 255},
 		{250, 251, 246, 255},
+		{218, 52, 103, 255},
+	}
+	colorPallettes[2] = []color.RGBA{
+		{0, 0, 0, 255},
+		{108, 115, 82, 255},
+		{142, 153, 111, 255},
+		{196, 208, 160, 255},
+		{218, 52, 103, 255},
+	}
+	colorPallettes[3] = []color.RGBA{
+		{33, 11, 27, 255},
+		{77, 34, 44, 255},
+		{157, 101, 76, 255},
+		{207, 171, 81, 255},
 		{218, 52, 103, 255},
 	}
 	tt, err := opentype.ParseReaderAt(bytes.NewReader(fontEarlyGameBoy_embed))
@@ -93,15 +93,23 @@ func uiInit() {
 func uiUpdate() {
 	if inpututil.IsKeyJustPressed(ebiten.Key1) {
 		currentPallette = 0
+		redrawBoardImage = true
+		redrawUpcomingShapesImage = true
 	}
 	if inpututil.IsKeyJustPressed(ebiten.Key2) {
 		currentPallette = 1
+		redrawBoardImage = true
+		redrawUpcomingShapesImage = true
 	}
 	if inpututil.IsKeyJustPressed(ebiten.Key3) {
 		currentPallette = 2
+		redrawBoardImage = true
+		redrawUpcomingShapesImage = true
 	}
 	if inpututil.IsKeyJustPressed(ebiten.Key4) {
 		currentPallette = 3
+		redrawBoardImage = true
+		redrawUpcomingShapesImage = true
 	}
 }
 

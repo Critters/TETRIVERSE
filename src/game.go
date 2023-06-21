@@ -17,7 +17,7 @@ import (
 
 var t int = 0
 var gameState int = 0 // 0:Normal 1:Level complete (FF)
-var currentLevel int = 0
+var currentLevel int = 3
 
 // The 20x10 board
 var boardMatrix [200]int
@@ -211,6 +211,10 @@ func gameUpdate() {
 		currentShape = currentShape % 5
 		redrawBoardImage = true
 	}*/
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		LoadLevel(currentLevel)
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		extractShape(shapeX, shapeY, currentShape, shapeRotation)
 		redrawBoardImage = true
