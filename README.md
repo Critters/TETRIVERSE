@@ -12,7 +12,9 @@ Windows Build: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" -o ..
 - 1,2,3,4 to change the color palette 
 
 ## Credits
+- Ebitengine: https://ebitengine.org/
 - Early GameBoy font: https://www.dafont.com/early-gameboy.font
+- Tkachevica-4px font: https://www.dafontfree.net/tkachevica-4px-regular/f55920.htm
 - Hollow Palette (key 2): https://lospec.com/palette-list/hollow
 - Gold BG Palette (key 4): https://lospec.com/palette-list/gold-gb
 - Lospec-gb Palette (key 5): https://lospec.com/palette-list/lospec-gb
