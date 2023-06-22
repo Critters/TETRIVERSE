@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,6 +18,15 @@ const (
 	gameScreen
 	overScreen
 )
+
+func switchScreen(screen int) {
+	fmt.Println("switchScreen()")
+	switch screen {
+	case 1:
+		gameInit()
+	}
+	currentScreen = screen
+}
 
 const (
 	GameWidth  int = 160
@@ -51,10 +61,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func main() {
-	gameInit()
 	uiInit()
-	ebiten.SetWindowSize(int(GameWidth)*4, int(GameHeight)*4)
-	ebiten.SetWindowTitle("Hello, World!")
+	ebiten.SetWindowSize(int(GameWidth)*2, int(GameHeight)*2)
+	ebiten.SetWindowTitle("REVERSTRIS")
 	ebiten.SetVsyncEnabled(false)
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)

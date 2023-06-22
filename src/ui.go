@@ -37,15 +37,13 @@ var fontTkachevica font.Face
 
 type palette []color.NRGBA
 
+var currentPallette int = 0
+var colorPallettes []palette
+
 func getColor(index int) color.NRGBA {
 	col := colorPallettes[currentPallette][index]
 	return col
 }
-
-var (
-	currentPallette int = 0
-	colorPallettes  []palette
-)
 
 func uiInit() {
 	colorPallettes = make([]palette, 5)
@@ -155,7 +153,7 @@ func drawDebug(screen *ebiten.Image) {
 	vector.DrawFilledRect(screen, 9, 146, 4, 5, getColor(2), false)
 	vector.DrawFilledRect(screen, 13, 146, 4, 5, getColor(3), false)
 	vector.DrawFilledRect(screen, 17, 146, 4, 5, getColor(4), false)
-	text.Draw(screen, "WASD, R, SPACE (or mouse)", fontTkachevica, 22, 151, color.NRGBA{128, 128, 128, 255})
+	text.Draw(screen, "WASD, Q-E, SPACE, [R]eset", fontTkachevica, 22, 151, color.NRGBA{128, 128, 128, 255})
 }
 
 /*
@@ -173,4 +171,8 @@ func drawOutlinedRect(screen *ebiten.Image, x float32, y float32, width float32,
 func drawBlock(screen *ebiten.Image, x float32, y float32, state int) {
 	// 0: inactive 2: highlighted 3: blocking
 	vector.DrawFilledRect(screen, x, y, 7, 7, getColor(state), false)
+}
+
+func lerp(a float32, b float32, f float32) float32 {
+	return a*(1.0-f) + (b * f)
 }

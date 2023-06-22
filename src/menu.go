@@ -37,9 +37,13 @@ func menuUpdate() {
 	}
 	// Mouse
 	var cursorX, cursorY = ebiten.CursorPosition()
+	clicked := inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0)
 	if cursorX > 54 && cursorX < 110 {
 		if cursorY > 52 && cursorY < 62 {
 			highlighted = 0
+			if clicked {
+				switchScreen(1)
+			}
 		}
 		if cursorY > 61 && cursorY < 74 {
 			highlighted = 1

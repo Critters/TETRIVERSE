@@ -8,6 +8,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -20,7 +21,13 @@ var gameState int = 0 // 0:Normal 1:Level complete (FF)
 var currentLevel int = 3
 
 // The 20x10 board
-var boardMatrix [200]int
+type boardBlock struct {
+	state int //0:Empty 1:Filled 2:Rising
+	color color.NRGBA
+	fade  float32 // Fades from 1 to 0 to control how much red to show
+}
+
+var boardMatrix [200]boardBlock
 
 // This is the image we render the game to, this is then copied to the screen
 var boardImage *ebiten.Image = ebiten.NewImage(70, 140)
@@ -64,7 +71,9 @@ type Level struct {
 }
 
 func gameInit() {
-	boardMatrix = [200]int{}
+	fmt.Println("gameInit()")
+	currentLevel = 0
+	boardMatrix = [200]boardBlock{}
 	possibleShapes = make([]shapes, 6)
 	possibleShapes[0] = [4]shape{
 		{1, 1, 0, 1, 1, 0, 0, 0, 0},
@@ -105,7 +114,15 @@ func LoadLevel(level int) {
 	currentLevel = level
 	var jsonFile JsonFile
 	json.Unmarshal(levelFile, &jsonFile)
-	boardMatrix = jsonFile.Levels[currentLevel].Start
+	tmpBoard := jsonFile.Levels[currentLevel].Start
+	for i := range tmpBoard {
+		tmpCol := getColor(0) // Empty
+		if tmpBoard[i] == 1 {
+			tmpCol = getColor(1) // Filled
+		}
+		boardMatrix[i].state = tmpBoard[i]
+		boardMatrix[i].color = tmpCol
+	}
 	upcomingShapes = jsonFile.Levels[currentLevel].Shapes
 	PopShape()
 }
@@ -144,6 +161,27 @@ func gameUpdate() {
 			if !raisedSomething {
 				NextLevel()
 			}
+		}
+	}
+
+	// Fade red to white
+	for i := range boardMatrix {
+		if boardMatrix[i].fade > 0 {
+			colorA := getColor(1)
+			colorB := getColor(4)
+			f := boardMatrix[i].fade
+			boardMatrix[i].color = color.NRGBA{
+				uint8(lerp(float32(colorA.R), float32(colorB.R), f)),
+				uint8(lerp(float32(colorA.G), float32(colorB.G), f)),
+				uint8(lerp(float32(colorA.B), float32(colorB.B), f)),
+				255,
+			}
+			boardMatrix[i].fade -= 0.025
+			if boardMatrix[i].fade <= 0 {
+				boardMatrix[i].color = getColor(1)
+				boardMatrix[i].fade = 0
+			}
+			redrawBoardImage = true
 		}
 	}
 
@@ -243,33 +281,46 @@ func gameUpdate() {
 
 	// Something changed, check shape again
 	if redrawBoardImage {
-		checkShape(shapeX, shapeY, currentShape, shapeRotation)
+		checkShape(shapeX, shapeY, currentShape, shapeRotation, false)
 	}
 }
 
 func gameDraw(screen *ebiten.Image) {
 	// Frames
-	drawOutlinedRect(screen, 63, 0, 71, 141, getColor(3), getColor(0))
+	drawOutlinedRect(screen, 63, 2, 71, 141, getColor(3), getColor(0))
 	text.Draw(screen, "NEXT", fontEarlyGameBoy, 8, 31, getColor(1))
 	drawOutlinedRect(screen, 8, 32, 34, 32, getColor(3), getColor(0))
-	drawOutlinedRect(screen, 8, 63, 34, 128, getColor(3), getColor(0))
+	drawOutlinedRect(screen, 8, 63, 34, 139-59, getColor(3), getColor(0))
 
 	if redrawBoardImage {
 		vector.DrawFilledRect(screen, 0, 0, 6, 6, getColor(4), false)
 		// Board
 		boardImage.Clear()
 		for i := 0; i < 200; i++ {
-			vector.DrawFilledRect(boardImage, float32(i%10)*7, float32((i/10)%20)*7, 6, 6, getColor(boardMatrix[i]), false)
+			vector.DrawFilledRect(boardImage, float32(i%10)*7, float32((i/10)%20)*7, 6, 6, boardMatrix[i].color, false)
 		}
 		// Shape
-		drawShape(boardImage, shapeX, shapeY, currentShape, shapeRotation, true)
+		drawShape(boardImage, shapeX, shapeY, 1, currentShape, shapeRotation, true, 0, 0)
 		redrawBoardImage = false
 	}
 
 	if redrawUpcomingShapesImage {
 		upcomingShapesImage.Clear()
 		for i := range upcomingShapes {
-			drawShape(upcomingShapesImage, 1, 1+(i*4), upcomingShapes[i], shapeRotation, false)
+			if i == 0 {
+				var offsetX, offsetY float32 = 0, 0
+				switch upcomingShapes[i] {
+				case 0:
+					offsetX = 2
+					offsetY = 2
+				case 3, 5, 4, 1, 2:
+					offsetY = -6
+
+				}
+				drawShape(upcomingShapesImage, 1, 1+(i*4), 1, upcomingShapes[i], shapeRotation, false, offsetX, offsetY)
+			} else {
+				drawShape(upcomingShapesImage, 2, 3+(i*4), 0.66, upcomingShapes[i], shapeRotation, false, 0, 0)
+			}
 		}
 		redrawUpcomingShapesImage = false
 	}
@@ -279,11 +330,12 @@ func gameDraw(screen *ebiten.Image) {
 	dio.GeoM.Translate(9, 33)
 	screen.DrawImage(upcomingShapesImage, dio)
 
-	dio.GeoM.Translate(64-9, 1-33)
+	dio = &ebiten.DrawImageOptions{}
+	dio.GeoM.Translate(64, 3)
 	screen.DrawImage(boardImage, dio)
 }
 
-func drawShape(screen *ebiten.Image, posX int, posY int, shapeID int, shapeRotation int, checkValid bool) {
+func drawShape(screen *ebiten.Image, posX int, posY int, scale float32, shapeID int, shapeRotation int, checkValid bool, offsetX float32, offsetY float32) {
 	if shapeID == -1 {
 		return
 	}
@@ -293,24 +345,24 @@ func drawShape(screen *ebiten.Image, posX int, posY int, shapeID int, shapeRotat
 			if shape[x+((y%3)*3)] == 1 {
 				// White
 				var col = getColor(3)
-				if checkValid && (posX+x)+((posY+y)*10) < 199 && boardMatrix[(posX+x)+((posY+y)*10)] == 0 {
+				if checkValid && (posX+x)+((posY+y)*10) < 199 && boardMatrix[(posX+x)+((posY+y)*10)].state != 1 {
 					// Red
 					col = getColor(4)
 				}
-				vector.DrawFilledRect(screen, float32(posX+x)*7, float32(posY+y)*7, 6, 6, col, false)
+				vector.DrawFilledRect(screen, offsetX+float32(posX+x)*(7*scale), offsetY+float32(posY+y)*(7*scale), (6 * scale), (6 * scale), col, false)
 			}
 		}
 	}
 }
 
 func extractShape(posX int, posY int, shapeID int, shapeRotation int) {
-	var clear = checkShape(posX, posY, shapeID, shapeRotation)
+	var clear = checkShape(posX, posY, shapeID, shapeRotation, true)
 	if clear {
 		var shape = possibleShapes[shapeID][shapeRotation]
 		for x := 0; x < 3; x++ {
 			for y := 0; y < 3; y++ {
 				if shape[x+((y%3)*3)] == 1 {
-					boardMatrix[(posX+x)+((posY+y)*10)] = 2
+					boardMatrix[(posX+x)+((posY+y)*10)].state = 2 // Rising
 				}
 			}
 		}
@@ -319,16 +371,18 @@ func extractShape(posX int, posY int, shapeID int, shapeRotation int) {
 }
 
 // Checks if the shape can be extracted
-func checkShape(posX int, posY int, shapeID int, shapeRotation int) bool {
+func checkShape(posX int, posY int, shapeID int, shapeRotation int, highlightBlocking bool) bool {
 	if shapeID == -1 {
 		return false
 	}
-	// Reset board to white
-	for i := 0; i < 200; i++ {
-		if boardMatrix[i] == 4 {
-			boardMatrix[i] = 1
+	/*
+		// Reset board to white
+		for i := 0; i < 200; i++ {
+			if boardMatrix[i].state == 4 {
+				boardMatrix[i].state = 1
+			}
 		}
-	}
+	*/
 
 	var shape = possibleShapes[shapeID][shapeRotation]
 	var extractable = true
@@ -336,21 +390,25 @@ func checkShape(posX int, posY int, shapeID int, shapeRotation int) bool {
 		for y := 0; y < 3; y++ {
 			if shape[x+((y%3)*3)] == 1 {
 				// A part of the shape is not on a block
-				if (posX+x)+((posY+y)*10) < 199 && boardMatrix[(posX+x)+((posY+y)*10)] == 0 {
+				if (posX+x)+((posY+y)*10) < 199 && boardMatrix[(posX+x)+((posY+y)*10)].state == 0 {
 					extractable = false
 				}
 				// Any block above the shape would prevent it from been able to be extracted
 				// Top row (special case)
 				if y == 0 {
-					if boardMatrix[(posX+x)+((posY+y-1)*10)] == 1 {
-						boardMatrix[(posX+x)+((posY+y-1)*10)] = 4
+					if boardMatrix[(posX+x)+((posY+y-1)*10)].state == 1 {
+						if highlightBlocking {
+							boardMatrix[(posX+x)+((posY+y-1)*10)].fade = 1
+						}
 						extractable = false
 					}
 				}
 				// Second and third row has to exclude blocks covered by the first row
 				if y == 1 || y == 2 {
-					if boardMatrix[(posX+x)+((posY+y-1)*10)] == 1 && shape[x+(((y%3)-1)*3)] == 0 {
-						boardMatrix[(posX+x)+((posY+y-1)*10)] = 4
+					if boardMatrix[(posX+x)+((posY+y-1)*10)].state == 1 && shape[x+(((y%3)-1)*3)] == 0 {
+						if highlightBlocking {
+							boardMatrix[(posX+x)+((posY+y-1)*10)].fade = 1
+						}
 						extractable = false
 					}
 				}
@@ -363,11 +421,13 @@ func checkShape(posX int, posY int, shapeID int, shapeRotation int) bool {
 func raiseShapes() (raisedSomething bool) {
 	raisedSomething = false
 	for i := 0; i < 200; i++ {
-		if boardMatrix[i] == 2 {
+		if boardMatrix[i].state == 2 {
 			raisedSomething = true
-			boardMatrix[i] = 0
+			boardMatrix[i].state = 0
+			boardMatrix[i].color = getColor(0)
 			if i-10 > 0 {
-				boardMatrix[i-10] = 2
+				boardMatrix[i-10].state = 2
+				boardMatrix[i-10].color = getColor(2)
 			}
 		}
 	}

@@ -7,8 +7,9 @@ Windows Build: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" -o ..
 
 ## Controls
 - Mouse or W-A-S-D to navigate the menu move the shape
-- Q-R to rotate the shape
+- Q-E to rotate the shape
 - Mouse click or SPACE to place the shape
+- R to reset the current level
 - 1,2,3,4 to change the color palette 
 
 ## Credits
@@ -23,7 +24,7 @@ Windows Build: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" -o ..
 - [x] Let the shapes go to the edges
 - [x] Visualize the blocks preventing a shape from getting extracted
 - [ ] Green shapes moving up should draw over everything
-- [ ] Pulse blocking shapes
+- [x] Pulse blocking shapes when trying to extract
 - [ ] Add single block "shape"
 - [x] Show upcoming shapes
 - [x] Switch which of the upcoming shapes you are placing
@@ -33,3 +34,8 @@ Windows Build: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" -o ..
 - [x] Reset
 - [ ] Holding key jogs shape
 - [x] Mouse control that plays nicely with keyboard controls
+- [x] Hook up play menu item
+- [ ] Help screen
+- [ ] Credits screen
+- [ ] Logo
+- [ ] SoundFX
