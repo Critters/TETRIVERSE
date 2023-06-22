@@ -50,17 +50,20 @@ func menuUpdate() {
 		}
 		if cursorY > 73 && cursorY < 86 {
 			highlighted = 2
+			if clicked {
+				switchScreen(3)
+			}
 		}
-		if cursorY > 85 && cursorY < 98 {
-			highlighted = 3
-		}
+		//if cursorY > 85 && cursorY < 98 {
+		//	highlighted = 2
+		//}
 	}
 	// Wraps around when pressing W on the top menu item
 	if highlighted < 0 {
-		highlighted = 3
+		highlighted = 2
 	}
 	// Wraps around when pressing S on the bottom menu item
-	highlighted = highlighted % 4
+	highlighted = highlighted % 3
 }
 
 func menuDraw(screen *ebiten.Image) {
@@ -84,33 +87,36 @@ func menuDraw(screen *ebiten.Image) {
 		col = getColor(3)
 		uiVisualMatrix = [200]int{
 			0, 0, 3, 0, 0, 0,
-			3, 3, 3, 1, 1, 0,
-			1, 1, 1, 1, 1, 1}
+			1, 1, 3, 1, 1, 0,
+			1, 1, 3, 3, 1, 1}
 	}
 	text.Draw(screen, "ENDLESS", fontEarlyGameBoy, 56, 72, col)
 
+	/*
+		col = getColor(1)
+		if highlighted == 2 {
+			dotX = 68
+			dotY = 84
+			col = getColor(3)
+			uiVisualMatrix = [200]int{
+				0, 0, 3, 0, 0, 0,
+				1, 3, 3, 3, 1, 0,
+				1, 1, 1, 1, 1, 1}
+		}
+		text.Draw(screen, "HELP", fontEarlyGameBoy, 68, 84, col)
+	*/
+
 	col = getColor(1)
 	if highlighted == 2 {
-		dotX = 68
-		dotY = 84
-		col = getColor(3)
-		uiVisualMatrix = [200]int{
-			0, 0, 3, 0, 0, 0,
-			1, 3, 3, 3, 1, 0,
-			1, 1, 1, 1, 1, 1}
-	}
-	text.Draw(screen, "HELP", fontEarlyGameBoy, 68, 84, col)
-	col = getColor(1)
-	if highlighted == 3 {
 		dotX = 56
-		dotY = 96
+		dotY = 84 //96
 		col = getColor(3)
 		uiVisualMatrix = [200]int{
 			0, 0, 1, 0, 0, 0,
 			1, 1, 1, 3, 3, 0,
 			1, 1, 1, 1, 3, 3}
 	}
-	text.Draw(screen, "CREDITS", fontEarlyGameBoy, 56, 96, col)
+	text.Draw(screen, "CREDITS", fontEarlyGameBoy, 56, 84, col)
 
 	// The dot
 	vector.DrawFilledCircle(screen, float32(dotX-8), float32(dotY-3000), 4, getColor(3), false)

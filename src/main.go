@@ -15,7 +15,9 @@ var currentScreen int
 
 const (
 	menuScreen int = iota
-	gameScreen
+	gamePuzzleScreen
+	gameEndlessScreen
+	creditsScreen
 	overScreen
 )
 
@@ -24,6 +26,10 @@ func switchScreen(screen int) {
 	switch screen {
 	case 1:
 		gameInit()
+	case 2:
+		// Endless
+	case 3:
+		creditsInit()
 	}
 	currentScreen = screen
 }
@@ -38,8 +44,10 @@ func (g *Game) Update() error {
 	switch currentScreen {
 	case menuScreen:
 		menuUpdate()
-	case gameScreen:
+	case gamePuzzleScreen:
 		gameUpdate()
+	case creditsScreen:
+		creditsUpdate()
 	}
 	return nil
 }
@@ -49,8 +57,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	switch currentScreen {
 	case menuScreen:
 		menuDraw(screen)
-	case gameScreen:
+	case gamePuzzleScreen:
 		gameDraw(screen)
+	case creditsScreen:
+		creditsDraw(screen)
 	}
 	drawDebug(screen)
 
@@ -62,7 +72,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 func main() {
 	uiInit()
-	switchScreen(1)
+	switchScreen(3)
 	ebiten.SetWindowSize(int(GameWidth)*5, int(GameHeight)*5)
 	ebiten.SetWindowTitle("REVERSTRIS")
 	ebiten.SetVsyncEnabled(false)

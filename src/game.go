@@ -76,7 +76,7 @@ type Level struct {
 
 func gameInit() {
 	fmt.Println("gameInit()")
-	currentLevel = 6
+	currentLevel = 7
 	boardMatrix = [200]boardBlock{}
 	possibleShapes = make([]shapes, 6)
 	possibleShapes[0] = [4]shape{
