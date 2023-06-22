@@ -11,7 +11,7 @@ import (
 type Game struct {
 }
 
-var currentScreen = 0
+var currentScreen int
 
 const (
 	menuScreen int = iota
@@ -62,7 +62,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 func main() {
 	uiInit()
-	ebiten.SetWindowSize(int(GameWidth)*2, int(GameHeight)*2)
+	switchScreen(1)
+	ebiten.SetWindowSize(int(GameWidth)*5, int(GameHeight)*5)
 	ebiten.SetWindowTitle("REVERSTRIS")
 	ebiten.SetVsyncEnabled(false)
 	if err := ebiten.RunGame(&Game{}); err != nil {

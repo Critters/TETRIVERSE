@@ -23,6 +23,9 @@ Windows Build: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" -o ..
 ## Todo
 - [x] Let the shapes go to the edges
 - [x] Visualize the blocks preventing a shape from getting extracted
+- [x] Shake when blocked
+- [x] Make it clear when you hit a dead end "Press R to reset"
+- [x] Level hints
 - [ ] Green shapes moving up should draw over everything
 - [x] Pulse blocking shapes when trying to extract
 - [ ] Add single block "shape"

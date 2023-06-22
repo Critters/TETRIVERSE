@@ -11,6 +11,7 @@ import (
 	"image/color"
 	"log"
 	"math"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -175,4 +176,23 @@ func drawBlock(screen *ebiten.Image, x float32, y float32, state int) {
 
 func lerp(a float32, b float32, f float32) float32 {
 	return a*(1.0-f) + (b * f)
+}
+
+func drawCenteredText(screen *ebiten.Image, txt string, centerX int, topY int, col color.NRGBA) {
+	words := strings.Split(txt, ",")
+	//maxWidth, totalHeight := 0, 0
+	// Find the height of all the words, and the max width
+	//for i := range words {
+	//	rect := text.BoundString(fontEarlyGameBoy, words[i])
+	//	totalHeight += rect.Dy()
+	//	if rect.Dx() > maxWidth {
+	//		maxWidth = rect.Dx()
+	//	}
+	//}
+	// Draw the words
+	for i := range words {
+		rect := text.BoundString(fontEarlyGameBoy, words[i])
+		text.Draw(screen, words[i], fontEarlyGameBoy, centerX-int(rect.Dx()/2), topY+rect.Dy()+(i*(rect.Dy()+2)), col)
+	}
+
 }

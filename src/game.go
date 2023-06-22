@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -19,6 +20,8 @@ import (
 var t int = 0
 var gameState int = 0 // 0:Normal 1:Level complete (FF)
 var currentLevel int = 3
+var shake float32 = 0
+var shakeX = 0
 
 // The 20x10 board
 type boardBlock struct {
@@ -44,6 +47,7 @@ var redrawBoardImage bool = true
 var upcomingShapes []int
 var upcomingShapesImage *ebiten.Image = ebiten.NewImage(32, 128)
 var redrawUpcomingShapesImage bool = true
+var levelHint string
 
 // The 3x3 matrix of a shape
 // The 4 rotations of a shape
@@ -66,6 +70,7 @@ type JsonFile struct {
 	Levels []Level `json:"levels"`
 }
 type Level struct {
+	Hint   string   `json:"hint"`
 	Start  [200]int `json:"start"`
 	Shapes []int    `json:"shapes"`
 }
@@ -124,6 +129,7 @@ func LoadLevel(level int) {
 		boardMatrix[i].color = tmpCol
 	}
 	upcomingShapes = jsonFile.Levels[currentLevel].Shapes
+	levelHint = jsonFile.Levels[currentLevel].Hint
 	PopShape()
 }
 
@@ -134,6 +140,7 @@ func PopShape() {
 		shapeRotation = 0
 		upcomingShapes = upcomingShapes[1:]
 		redrawUpcomingShapesImage = true
+		stillPossibleResult = stillPossible()
 	} else {
 		// No more shapes left
 		currentShape = -1
@@ -151,6 +158,14 @@ var oldX, oldY int
 
 func gameUpdate() {
 	t++
+
+	if shake > 0 {
+		shake -= 0.0166
+		shakeX = rand.Intn(4) - 2
+	} else {
+		shakeX = 0
+	}
+
 	if gameState == 0 {
 		if t%30 == 0 {
 			raiseShapes()
@@ -213,6 +228,7 @@ func gameUpdate() {
 	}
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0) {
 		extractShape(shapeX, shapeY, currentShape, shapeRotation)
+		redrawBoardImage = true
 	}
 
 	// Keyboard
@@ -244,11 +260,9 @@ func gameUpdate() {
 		}
 		redrawBoardImage = true
 	}
-	/*if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		currentShape++
-		currentShape = currentShape % 5
-		redrawBoardImage = true
-	}*/
+	if inpututil.IsKeyJustPressed(ebiten.KeyT) {
+		stillPossibleResult = stillPossible()
+	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
 		LoadLevel(currentLevel)
@@ -287,21 +301,30 @@ func gameUpdate() {
 
 func gameDraw(screen *ebiten.Image) {
 	// Frames
-	drawOutlinedRect(screen, 63, 2, 71, 141, getColor(3), getColor(0))
-	text.Draw(screen, "NEXT", fontEarlyGameBoy, 8, 31, getColor(1))
+	drawOutlinedRect(screen, 63+float32(shakeX), 2, 71, 141, getColor(3), getColor(0))
+	if stillPossibleResult {
+		drawCenteredText(screen, levelHint, 63+35+shakeX, 16, getColor(1))
+	} else {
+		drawCenteredText(screen, "Press R,to reset", 63+35+shakeX, 16, getColor(4))
+	}
+
 	drawOutlinedRect(screen, 8, 32, 34, 32, getColor(3), getColor(0))
 	drawOutlinedRect(screen, 8, 63, 34, 139-59, getColor(3), getColor(0))
+	text.Draw(screen, "NEXT", fontEarlyGameBoy, 8, 31, getColor(1))
 
 	if redrawBoardImage {
 		vector.DrawFilledRect(screen, 0, 0, 6, 6, getColor(4), false)
 		// Board
 		boardImage.Clear()
 		for i := 0; i < 200; i++ {
-			vector.DrawFilledRect(boardImage, float32(i%10)*7, float32((i/10)%20)*7, 6, 6, boardMatrix[i].color, false)
+			if boardMatrix[i].state > 0 {
+				vector.DrawFilledRect(boardImage, float32(i%10)*7, float32((i/10)%20)*7, 6, 6, boardMatrix[i].color, false)
+			}
 		}
 		// Shape
 		drawShape(boardImage, shapeX, shapeY, 1, currentShape, shapeRotation, true, 0, 0)
 		redrawBoardImage = false
+
 	}
 
 	if redrawUpcomingShapesImage {
@@ -331,7 +354,7 @@ func gameDraw(screen *ebiten.Image) {
 	screen.DrawImage(upcomingShapesImage, dio)
 
 	dio = &ebiten.DrawImageOptions{}
-	dio.GeoM.Translate(64, 3)
+	dio.GeoM.Translate(64+float64(shakeX), 3)
 	screen.DrawImage(boardImage, dio)
 }
 
@@ -367,6 +390,8 @@ func extractShape(posX int, posY int, shapeID int, shapeRotation int) {
 			}
 		}
 		PopShape()
+	} else {
+		shake = 0.33
 	}
 }
 
@@ -390,24 +415,31 @@ func checkShape(posX int, posY int, shapeID int, shapeRotation int, highlightBlo
 		for y := 0; y < 3; y++ {
 			if shape[x+((y%3)*3)] == 1 {
 				// A part of the shape is not on a block
-				if (posX+x)+((posY+y)*10) < 199 && boardMatrix[(posX+x)+((posY+y)*10)].state == 0 {
+				if (posX+x)+((posY+y)*10) < 200 && boardMatrix[(posX+x)+((posY+y)*10)].state != 1 {
 					extractable = false
 				}
 				// Any block above the shape would prevent it from been able to be extracted
 				// Top row (special case)
+				pos := (posX + x) + ((posY + y - 1) * 10)
+				if pos < 0 {
+					extractable = false
+				}
+				if pos > 199 {
+					extractable = false
+				}
 				if y == 0 {
-					if boardMatrix[(posX+x)+((posY+y-1)*10)].state == 1 {
+					if boardMatrix[pos].state == 1 {
 						if highlightBlocking {
-							boardMatrix[(posX+x)+((posY+y-1)*10)].fade = 1
+							boardMatrix[pos].fade = 1
 						}
 						extractable = false
 					}
 				}
 				// Second and third row has to exclude blocks covered by the first row
 				if y == 1 || y == 2 {
-					if boardMatrix[(posX+x)+((posY+y-1)*10)].state == 1 && shape[x+(((y%3)-1)*3)] == 0 {
+					if boardMatrix[pos].state == 1 && shape[x+(((y%3)-1)*3)] == 0 {
 						if highlightBlocking {
-							boardMatrix[(posX+x)+((posY+y-1)*10)].fade = 1
+							boardMatrix[pos].fade = 1
 						}
 						extractable = false
 					}
@@ -433,4 +465,31 @@ func raiseShapes() (raisedSomething bool) {
 	}
 	redrawBoardImage = true
 	return raisedSomething
+}
+
+var stillPossibleResult bool
+
+func stillPossible() bool {
+	for x := 0; x < 9; x++ {
+		for y := 1; y < 19; y++ {
+			for r := 0; r < 4; r++ {
+				y2 := y
+				if y >= 18 {
+					var shape = possibleShapes[currentShape][r]
+					if shape[6] == 0 && shape[7] == 0 && shape[8] == 0 {
+						y2 = 18
+					} else {
+						y2 = 17
+					}
+				}
+				if checkShape(x, y2, currentShape, r, false) {
+					fmt.Println("Found spot ", currentShape, x, y2, r)
+					drawShape(boardImage, x, y2-3, 1, currentShape, r, false, 0, 0)
+					return true
+				}
+			}
+		}
+	}
+	fmt.Println("Still possible? NO")
+	return false
 }
