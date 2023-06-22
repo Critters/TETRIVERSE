@@ -13,7 +13,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -77,7 +76,7 @@ type Level struct {
 
 func gameInit() {
 	fmt.Println("gameInit()")
-	currentLevel = 0
+	currentLevel = 2
 	boardMatrix = [200]boardBlock{}
 	possibleShapes = make([]shapes, 6)
 	possibleShapes[0] = [4]shape{
@@ -308,9 +307,9 @@ func gameDraw(screen *ebiten.Image) {
 		drawCenteredText(screen, "Press R,to reset", 63+35+shakeX, 16, getColor(4))
 	}
 
-	drawOutlinedRect(screen, 8, 32, 34, 32, getColor(3), getColor(0))
-	drawOutlinedRect(screen, 8, 63, 34, 139-59, getColor(3), getColor(0))
-	text.Draw(screen, "NEXT", fontEarlyGameBoy, 8, 31, getColor(1))
+	drawOutlinedRect(screen, 23, 2, 34, 32, getColor(3), getColor(0))
+	drawOutlinedRect(screen, 23, 33, 34, 110, getColor(3), getColor(0))
+	//text.Draw(screen, "NEXT", fontEarlyGameBoy, 8, 31, getColor(1))
 
 	if redrawBoardImage {
 		vector.DrawFilledRect(screen, 0, 0, 6, 6, getColor(4), false)
@@ -350,7 +349,7 @@ func gameDraw(screen *ebiten.Image) {
 
 	// Compile
 	var dio *ebiten.DrawImageOptions = &ebiten.DrawImageOptions{}
-	dio.GeoM.Translate(9, 33)
+	dio.GeoM.Translate(24, 2)
 	screen.DrawImage(upcomingShapesImage, dio)
 
 	dio = &ebiten.DrawImageOptions{}
