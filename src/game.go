@@ -74,11 +74,22 @@ type Level struct {
 	Shapes []int    `json:"shapes"`
 }
 
-func gameInit() {
-	fmt.Println("gameInit()")
-	currentLevel = 7
+type modes int
+
+const (
+	puzzle modes = iota
+	endless
+)
+
+var gameMode modes
+
+func gameInit(m modes) {
+	gameMode = m
+	fmt.Printf("gameInit(%v)\n", gameMode)
+
+	currentLevel = 0
 	boardMatrix = [200]boardBlock{}
-	possibleShapes = make([]shapes, 6)
+	possibleShapes = make([]shapes, 7)
 	possibleShapes[0] = [4]shape{
 		{1, 1, 0, 1, 1, 0, 0, 0, 0},
 		{1, 1, 0, 1, 1, 0, 0, 0, 0},
@@ -109,8 +120,17 @@ func gameInit() {
 		{0, 1, 0, 1, 1, 0, 1, 0, 0},
 		{0, 0, 0, 1, 1, 0, 0, 1, 1},
 		{0, 1, 0, 1, 1, 0, 1, 0, 0}} // Other Z
+	possibleShapes[6] = [4]shape{
+		{0, 0, 0, 0, 1, 0, 0, 0, 0},
+		{0, 0, 0, 0, 1, 0, 0, 0, 0},
+		{0, 0, 0, 0, 1, 0, 0, 0, 0},
+		{0, 0, 0, 0, 1, 0, 0, 0, 0}} // DOT
 
-	LoadLevel(currentLevel)
+	if gameMode == puzzle {
+		LoadLevel(currentLevel)
+	} else if gameMode == endless {
+		LoadEndless()
+	}
 }
 
 func LoadLevel(level int) {
@@ -132,8 +152,46 @@ func LoadLevel(level int) {
 	PopShape()
 }
 
+func LoadEndless() {
+	fmt.Println("LoadEndless()")
+	currentLevel = 0
+	endlessCountdown = 10
+	endlessLinesAdded = 0
+	for i := 0; i < 200; i++ {
+		boardMatrix[i].state = 0
+	}
+	levelHint = ""
+	upcomingShapes = []int{0, 1, 2, 3, 4, 5, 6}
+	AddLines(3, true)
+	AddLines(3, false)
+	redrawBoardImage = true
+	redrawUpcomingShapesImage = true
+	PopShape()
+}
+
+func AddLines(count int, forceSolid bool) {
+	for i := 0; i < count; i++ {
+		// Move all lines up
+		for i := 10; i < 200; i++ {
+			boardMatrix[i-10] = boardMatrix[i]
+			boardMatrix[i].state = 0
+		}
+		// Add line at bottom
+		for i := 190; i < 200; i++ {
+			if forceSolid || rand.Intn(8) != 1 {
+				boardMatrix[i].state = 1
+				boardMatrix[i].color = getColor(1)
+			}
+		}
+	}
+	redrawBoardImage = true
+}
+
 // Removes the top shape from the list and makes it the current
 func PopShape() {
+	if gameMode == endless {
+		upcomingShapes = append(upcomingShapes, rand.Intn(6))
+	}
 	if len(upcomingShapes) > 0 {
 		currentShape = upcomingShapes[0]
 		shapeRotation = 0
@@ -153,7 +211,7 @@ func NextLevel() {
 	gameState = 0
 }
 
-var oldX, oldY int
+var oldX, oldY, endlessCountdown, endlessLinesAdded int
 
 func gameUpdate() {
 	t++
@@ -174,6 +232,23 @@ func gameUpdate() {
 			raisedSomething := raiseShapes()
 			if !raisedSomething {
 				NextLevel()
+			}
+		}
+	}
+
+	if gameMode == endless {
+		if t%60 == 0 {
+			if stillPossibleResult {
+				endlessCountdown--
+				if endlessCountdown == 0 {
+					AddLines(1, false)
+					endlessCountdown = (10 - endlessLinesAdded)
+					if endlessCountdown < 5 {
+						endlessCountdown = 5
+					}
+					endlessLinesAdded++
+				}
+				redrawBoardImage = true
 			}
 		}
 	}
@@ -264,7 +339,11 @@ func gameUpdate() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		LoadLevel(currentLevel)
+		if gameMode == puzzle {
+			LoadLevel(currentLevel)
+		} else if gameMode == endless {
+			gameInit(endless)
+		}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		extractShape(shapeX, shapeY, currentShape, shapeRotation)
@@ -302,7 +381,11 @@ func gameDraw(screen *ebiten.Image) {
 	// Frames
 	drawOutlinedRect(screen, 63+float32(shakeX), 2, 71, 141, getColor(3), getColor(0))
 	if stillPossibleResult {
-		drawCenteredText(screen, levelHint, 63+35+shakeX, 16, getColor(1))
+		if gameMode == puzzle {
+			drawCenteredText(screen, levelHint, 63+35+shakeX, 16, getColor(1))
+		} else if gameMode == endless {
+			drawCenteredText(screen, fmt.Sprint(endlessCountdown), 63+35+shakeX, 16, getColor(1))
+		}
 	} else {
 		drawCenteredText(screen, "Press R,to reset", 63+35+shakeX, 16, getColor(4))
 	}
@@ -341,7 +424,7 @@ func gameDraw(screen *ebiten.Image) {
 				}
 				drawShape(upcomingShapesImage, 1, 1+(i*4), 1, upcomingShapes[i], shapeRotation, false, offsetX, offsetY)
 			} else {
-				drawShape(upcomingShapesImage, 2, 3+(i*4), 0.66, upcomingShapes[i], shapeRotation, false, 0, 0)
+				drawShape(upcomingShapesImage, 2, 4+(i*4), 0.66, upcomingShapes[i], shapeRotation, false, 0, 0)
 			}
 		}
 		redrawUpcomingShapesImage = false

@@ -38,7 +38,7 @@ var fontTkachevica font.Face
 
 type palette []color.NRGBA
 
-var currentPallette int = 0
+var currentPallette int = 1
 var colorPallettes []palette
 
 func getColor(index int) color.NRGBA {

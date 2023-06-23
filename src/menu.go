@@ -47,6 +47,9 @@ func menuUpdate() {
 		}
 		if cursorY > 61 && cursorY < 74 {
 			highlighted = 1
+			if clicked {
+				switchScreen(2)
+			}
 		}
 		if cursorY > 73 && cursorY < 86 {
 			highlighted = 2

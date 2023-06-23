@@ -1,7 +1,3 @@
-/*
-Contains the logic and rendering for the main menu
-*/
-
 package main
 
 import (
