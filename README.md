@@ -1,4 +1,4 @@
-#### TETRIVERSE
+# TETRIVERSE
 A game created in a week for the Ebitengine game jam 2023
 
 ## Play on itch.io
