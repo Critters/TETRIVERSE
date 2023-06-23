@@ -1,8 +1,14 @@
+#### TETRIVERSE
+A game created in a week for the Ebitengine game jam 2023
+
+## Play on itch.io
+https://enbiggen.itch.io/tetriverse
+
 ## Run
 ```
 Run: go run ./src/.
-Mac Build: env GOOS=js GOARCH=wasm go build -o ./dist/main.wasm ./src/.
-Windows Build: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" -o ../dist/main.wasm
+Mac Build WASM: env GOOS=js GOARCH=wasm go build -o ./dist/main.wasm ./src/.
+Windows Build WASM: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" -o ../dist/main.wasm
 ```
 
 ## Controls
@@ -28,6 +34,9 @@ Windows Build: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" -o ..
 - [ ] Check more than one block above
 - [x] Make it clear when you hit a dead end "Press R to reset"
 - [x] Level hints
+- [ ] Game over if line hits top in endless mode
+- [ ] More single blocks in endless mode
+- [ ] Single block can't go all the way to the left in endless mode
 - [x] Pulse blocking shapes when trying to extract
 - [ ] Add single block "shape"
 - [x] Show upcoming shapes

@@ -74,7 +74,7 @@ func main() {
 	uiInit()
 	switchScreen(0)
 	ebiten.SetWindowSize(int(GameWidth)*5, int(GameHeight)*5)
-	ebiten.SetWindowTitle("REVERSTRIS")
+	ebiten.SetWindowTitle("TETRIVERSE")
 	ebiten.SetVsyncEnabled(false)
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
