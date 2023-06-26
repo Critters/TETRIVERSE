@@ -30,6 +30,10 @@ var sfx_menu []*audio.Player
 var sfx_game_over_byte []byte
 var sfx_game_over []*audio.Player
 
+//go:embed assets/start.wav
+var sfx_start_byte []byte
+var sfx_start []*audio.Player
+
 func soundInit() {
 	if audioContext == nil {
 		audioContext = audio.NewContext(44100)
@@ -66,6 +70,13 @@ func soundInit() {
 		tmpDecoded, _ := wav.DecodeWithSampleRate(44100, bytes.NewReader(sfx_game_over_byte))
 		sfx_game_over[i], _ = audioContext.NewPlayer(tmpDecoded)
 		sfx_game_over[i].SetVolume(0.5)
+	}
+
+	sfx_start = make([]*audio.Player, 1)
+	for i := 0; i < 1; i++ {
+		tmpDecoded, _ := wav.DecodeWithSampleRate(44100, bytes.NewReader(sfx_start_byte))
+		sfx_start[i], _ = audioContext.NewPlayer(tmpDecoded)
+		sfx_start[i].SetVolume(0.5)
 	}
 }
 

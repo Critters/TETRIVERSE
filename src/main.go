@@ -25,8 +25,10 @@ func switchScreen(screen int) {
 	fmt.Println("switchScreen()")
 	switch screen {
 	case 1:
+		soundPlay(sfx_start)
 		gameInit(0)
 	case 2:
+		soundPlay(sfx_start)
 		gameInit(1)
 	case 3:
 		creditsInit()

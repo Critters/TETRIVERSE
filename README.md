@@ -54,7 +54,7 @@ Windows Build WASM: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" 
 - [ ] Logo
 
 ## Make pretty
-- [ ] Fade left behind by shapes moving up
+- [x] Fade left behind by shapes moving up
 - [ ] Fade left behind (on empty cells) by the shape you move around
 - [ ] Level up animation for puzzles
 - [ ] Level up animation for endless

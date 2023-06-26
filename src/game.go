@@ -24,9 +24,10 @@ var shakeX = 0
 
 // The 20x10 board
 type boardBlock struct {
-	state int //0:Empty 1:Filled 2:Rising
-	color color.NRGBA
-	fade  float32 // Fades from 1 to 0 to control how much red to show
+	state     int //0:Empty 1:Filled 2:Rising
+	baseColor color.NRGBA
+	fadeColor color.NRGBA
+	fade      float32 // Fades from 1 to 0 to control how much red to show
 }
 
 var boardMatrix [200]boardBlock
@@ -87,7 +88,7 @@ func gameInit(m modes) {
 	gameMode = m
 	fmt.Printf("gameInit(%v)\n", gameMode)
 
-	currentLevel = 0
+	currentLevel = 3
 	boardMatrix = [200]boardBlock{}
 	possibleShapes = make([]shapes, 7)
 	possibleShapes[0] = [4]shape{
@@ -145,7 +146,7 @@ func LoadLevel(level int) {
 			tmpCol = getColor(1) // Filled
 		}
 		boardMatrix[i].state = tmpBoard[i]
-		boardMatrix[i].color = tmpCol
+		boardMatrix[i].baseColor = tmpCol
 	}
 	upcomingShapes = jsonFile.Levels[currentLevel].Shapes
 	levelHint = jsonFile.Levels[currentLevel].Hint
@@ -180,7 +181,7 @@ func AddLines(count int, forceSolid bool) {
 		for i := 190; i < 200; i++ {
 			if forceSolid || rand.Intn(8) != 1 {
 				boardMatrix[i].state = 1
-				boardMatrix[i].color = getColor(1)
+				boardMatrix[i].baseColor = getColor(1)
 			}
 		}
 	}
@@ -258,17 +259,20 @@ func gameUpdate() {
 	for i := range boardMatrix {
 		if boardMatrix[i].fade > 0 {
 			colorA := getColor(1)
-			colorB := getColor(4)
+			if boardMatrix[i].state == 0 {
+				colorA = getColor(0)
+			}
+			colorB := boardMatrix[i].fadeColor
 			f := boardMatrix[i].fade
-			boardMatrix[i].color = color.NRGBA{
+			boardMatrix[i].baseColor = color.NRGBA{
 				uint8(lerp(float32(colorA.R), float32(colorB.R), f)),
 				uint8(lerp(float32(colorA.G), float32(colorB.G), f)),
 				uint8(lerp(float32(colorA.B), float32(colorB.B), f)),
 				255,
 			}
-			boardMatrix[i].fade -= 0.025
+			boardMatrix[i].fade -= 0.05
 			if boardMatrix[i].fade <= 0 {
-				boardMatrix[i].color = getColor(1)
+				boardMatrix[i].baseColor = getColor(1)
 				boardMatrix[i].fade = 0
 			}
 			redrawBoardImage = true
@@ -400,8 +404,8 @@ func gameDraw(screen *ebiten.Image) {
 		// Board
 		boardImage.Clear()
 		for i := 0; i < 200; i++ {
-			if boardMatrix[i].state > 0 {
-				vector.DrawFilledRect(boardImage, float32(i%10)*7, float32((i/10)%20)*7, 6, 6, boardMatrix[i].color, false)
+			if boardMatrix[i].state > 0 || boardMatrix[i].fade > 0 {
+				vector.DrawFilledRect(boardImage, float32(i%10)*7, float32((i/10)%20)*7, 6, 6, boardMatrix[i].baseColor, false)
 			}
 		}
 		// Shape
@@ -511,6 +515,7 @@ func checkShape(posX int, posY int, shapeID int, shapeRotation int, highlightBlo
 						if y == 0 || shape[x+(((y%3)-1)*3)] == 0 {
 							if highlightBlocking {
 								boardMatrix[pos].fade = 1
+								boardMatrix[pos].fadeColor = getColor(4)
 							}
 							extractable = false
 						}
@@ -545,10 +550,13 @@ func raiseShapes() (raisedSomething bool) {
 		if boardMatrix[i].state == 2 {
 			raisedSomething = true
 			boardMatrix[i].state = 0
-			boardMatrix[i].color = getColor(0)
+			boardMatrix[i].baseColor = getColor(0)
+			boardMatrix[i].fade = 1
+			boardMatrix[i].fadeColor = getColor(1)
 			if i-10 > 0 {
 				boardMatrix[i-10].state = 2
-				boardMatrix[i-10].color = getColor(2)
+				boardMatrix[i-10].baseColor = getColor(2)
+				boardMatrix[i-10].fade = 0
 			}
 		}
 	}
