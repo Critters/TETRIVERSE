@@ -31,7 +31,7 @@ Windows Build WASM: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" 
 - [x] Visualize the blocks preventing a shape from getting extracted
 - [x] Shake when blocked
 - [x] Endless mode
-- [ ] Check more than one block above
+- [x] Check more than one block above
 - [x] Make it clear when you hit a dead end "Press R to reset"
 - [x] Level hints
 - [ ] Game over if line hits top in endless mode
