@@ -72,7 +72,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 func main() {
 	uiInit()
-	switchScreen(0)
+	switchScreen(1)
 	ebiten.SetWindowSize(int(GameWidth)*5, int(GameHeight)*5)
 	ebiten.SetWindowTitle("TETRIVERSE")
 	ebiten.SetVsyncEnabled(false)

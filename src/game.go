@@ -18,7 +18,7 @@ import (
 
 var t int = 0
 var gameState int = 0 // 0:Normal 1:Level complete (FF)
-var currentLevel int = 3
+var currentLevel int = 8
 var shake float32 = 0
 var shakeX = 0
 
@@ -87,7 +87,7 @@ func gameInit(m modes) {
 	gameMode = m
 	fmt.Printf("gameInit(%v)\n", gameMode)
 
-	currentLevel = 0
+	currentLevel = 8
 	boardMatrix = [200]boardBlock{}
 	possibleShapes = make([]shapes, 7)
 	possibleShapes[0] = [4]shape{
@@ -491,6 +491,7 @@ func checkShape(posX int, posY int, shapeID int, shapeRotation int, highlightBlo
 		}
 	*/
 
+	// Any block above the shape would prevent it from been able to be extracted
 	var shape = possibleShapes[shapeID][shapeRotation]
 	var extractable = true
 	for x := 0; x < 3; x++ {
@@ -500,24 +501,27 @@ func checkShape(posX int, posY int, shapeID int, shapeRotation int, highlightBlo
 				if (posX+x)+((posY+y)*10) < 200 && boardMatrix[(posX+x)+((posY+y)*10)].state != 1 {
 					extractable = false
 				}
-				// Any block above the shape would prevent it from been able to be extracted
-				// Top row (special case)
-				pos := (posX + x) + ((posY + y - 1) * 10)
+				// Any problem in computer science can be solved with one more iteration
+				for i := 1; i < 10; i++ {
+					pos := (posX + x) + ((posY + y - i) * 10)
+					if pos > 0 && pos < 199 && boardMatrix[pos].state == 1 {
+						if y == 0 || shape[x+(((y%3)-1)*3)] == 0 {
+							if highlightBlocking {
+								boardMatrix[pos].fade = 1
+							}
+							extractable = false
+						}
+					}
+				}
+
+				// Second and third row has to exclude blocks covered by the first row
+				/*pos := (posX + x) + ((posY + y - 1) * 10)
 				if pos < 0 {
 					extractable = false
 				}
 				if pos > 199 {
 					extractable = false
 				}
-				if y == 0 {
-					if boardMatrix[pos].state == 1 {
-						if highlightBlocking {
-							boardMatrix[pos].fade = 1
-						}
-						extractable = false
-					}
-				}
-				// Second and third row has to exclude blocks covered by the first row
 				if y == 1 || y == 2 {
 					if boardMatrix[pos].state == 1 && shape[x+(((y%3)-1)*3)] == 0 {
 						if highlightBlocking {
@@ -525,7 +529,7 @@ func checkShape(posX int, posY int, shapeID int, shapeRotation int, highlightBlo
 						}
 						extractable = false
 					}
-				}
+				}*/
 			}
 		}
 	}
