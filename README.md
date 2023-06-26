@@ -34,21 +34,27 @@ Windows Build WASM: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" 
 - [x] Check more than one block above
 - [x] Make it clear when you hit a dead end "Press R to reset"
 - [x] Level hints
-- [ ] Game over if line hits top in endless mode
-- [ ] More single blocks in endless mode
-- [ ] Single block can't go all the way to the left in endless mode
 - [x] Pulse blocking shapes when trying to extract
-- [ ] Add single block "shape"
 - [x] Show upcoming shapes
 - [x] Switch which of the upcoming shapes you are placing
 - [x] Block placing if trapped under another block
-- [ ] Add new lines
-- [ ] Score
 - [x] Reset
-- [ ] Holding key jogs shape
 - [x] Mouse control that plays nicely with keyboard controls
 - [x] Hook up play menu item
-- [ ] Help screen
 - [x] Credits screen
+- [x] SoundFX
+- [ ] Game over if line hits top in endless mode
+- [ ] More single blocks in endless mode
+- [ ] Single block can't go all the way to the left in endless mode
+- [ ] Add single block "shape"
+- [ ] Add new lines
+- [ ] Score
+- [ ] Holding key jogs shape
+- [ ] Help screen
 - [ ] Logo
-- [ ] SoundFX
+
+## Make pretty
+- [ ] Fade left behind by shapes moving up
+- [ ] Fade left behind (on empty cells) by the shape you move around
+- [ ] Level up animation for puzzles
+- [ ] Level up animation for endless

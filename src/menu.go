@@ -14,6 +14,8 @@ import (
 )
 
 var highlighted int = 0
+var lastHighlighted int = -1
+
 var uiVisualImage *ebiten.Image
 var uiVisualMatrix [200]int
 
@@ -67,6 +69,11 @@ func menuUpdate() {
 	}
 	// Wraps around when pressing S on the bottom menu item
 	highlighted = highlighted % 3
+
+	if highlighted != lastHighlighted {
+		lastHighlighted = highlighted
+		soundPlay(sfx_menu)
+	}
 }
 
 func menuDraw(screen *ebiten.Image) {

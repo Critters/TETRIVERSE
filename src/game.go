@@ -18,7 +18,7 @@ import (
 
 var t int = 0
 var gameState int = 0 // 0:Normal 1:Level complete (FF)
-var currentLevel int = 8
+var currentLevel int = 0
 var shake float32 = 0
 var shakeX = 0
 
@@ -87,7 +87,7 @@ func gameInit(m modes) {
 	gameMode = m
 	fmt.Printf("gameInit(%v)\n", gameMode)
 
-	currentLevel = 8
+	currentLevel = 0
 	boardMatrix = [200]boardBlock{}
 	possibleShapes = make([]shapes, 7)
 	possibleShapes[0] = [4]shape{
@@ -203,6 +203,7 @@ func PopShape() {
 		currentShape = -1
 		redrawUpcomingShapesImage = true
 		gameState = 1
+		soundPlay(sfx_level_complete)
 	}
 }
 
@@ -471,9 +472,11 @@ func extractShape(posX int, posY int, shapeID int, shapeRotation int) {
 				}
 			}
 		}
+		soundPlay(sfx_extracted)
 		PopShape()
 	} else {
 		shake = 0.33
+		soundPlay(sfx_blocked)
 	}
 }
 
@@ -569,7 +572,7 @@ func stillPossible() bool {
 					}
 				}
 				if checkShape(x, y2, currentShape, r, false) {
-					fmt.Println("Found spot ", currentShape, x, y2, r)
+					//fmt.Println("Found spot ", currentShape, x, y2, r)
 					drawShape(boardImage, x, y2-3, 1, currentShape, r, false, 0, 0)
 					return true
 				}
@@ -577,5 +580,6 @@ func stillPossible() bool {
 		}
 	}
 	fmt.Println("Still possible? NO")
+	soundPlay(sfx_game_over)
 	return false
 }

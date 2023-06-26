@@ -62,8 +62,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	case creditsScreen:
 		creditsDraw(screen)
 	}
-	drawDebug(screen)
-
+	//drawDebug(screen)
+	drawFooter(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -71,8 +71,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func main() {
+	soundInit()
 	uiInit()
-	switchScreen(1)
+	switchScreen(0)
 	ebiten.SetWindowSize(int(GameWidth)*5, int(GameHeight)*5)
 	ebiten.SetWindowTitle("TETRIVERSE")
 	ebiten.SetVsyncEnabled(false)

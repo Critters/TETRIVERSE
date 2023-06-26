@@ -147,7 +147,9 @@ func drawDebug(screen *ebiten.Image) {
 	text.Draw(screen, fmt.Sprint(math.Floor(ebiten.ActualFPS()), "fps"), fontTkachevica, 1, 8, getColor(1))
 	var cursorX, cursorY = ebiten.CursorPosition()
 	text.Draw(screen, fmt.Sprint(cursorX, ", ", cursorY), fontTkachevica, 1, 16, getColor(1))
+}
 
+func drawFooter(screen *ebiten.Image) {
 	vector.DrawFilledRect(screen, 0, 145, 160, 8, color.NRGBA{0, 0, 0, 255}, false)
 	vector.DrawFilledRect(screen, 1, 146, 4, 5, getColor(0), false)
 	vector.DrawFilledRect(screen, 5, 146, 4, 5, getColor(1), false)
