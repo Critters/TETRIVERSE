@@ -19,8 +19,10 @@ import (
 var t int = 0
 var gameState int = 0 // 0:Normal 1:Level complete (FF)
 var currentLevel int = 0
+var score int = 0
 var shake float32 = 0
 var shakeX = 0
+var gameOverResult bool
 
 // The 20x10 board
 type boardBlock struct {
@@ -88,7 +90,7 @@ func gameInit(m modes) {
 	gameMode = m
 	fmt.Printf("gameInit(%v)\n", gameMode)
 
-	currentLevel = 3
+	currentLevel = 0
 	boardMatrix = [200]boardBlock{}
 	possibleShapes = make([]shapes, 7)
 	possibleShapes[0] = [4]shape{
@@ -137,6 +139,7 @@ func gameInit(m modes) {
 func LoadLevel(level int) {
 	fmt.Println("LoadLevel(", level, ")")
 	currentLevel = level
+	gameOverResult = false
 	var jsonFile JsonFile
 	json.Unmarshal(levelFile, &jsonFile)
 	tmpBoard := jsonFile.Levels[currentLevel].Start
@@ -158,6 +161,8 @@ func LoadEndless() {
 	currentLevel = 0
 	endlessCountdown = 10
 	endlessLinesAdded = 0
+	gameOverResult = false
+	score = 0
 	for i := 0; i < 200; i++ {
 		boardMatrix[i].state = 0
 	}
@@ -170,18 +175,33 @@ func LoadEndless() {
 	PopShape()
 }
 
+func gameOver() {
+	soundPlay(sfx_game_over)
+	gameOverResult = true
+}
+
 func AddLines(count int, forceSolid bool) {
-	for i := 0; i < count; i++ {
-		// Move all lines up
-		for i := 10; i < 200; i++ {
-			boardMatrix[i-10] = boardMatrix[i]
-			boardMatrix[i].state = 0
+	overflowed := false
+	for i := 0; i < 10; i++ {
+		if boardMatrix[i].state == 1 {
+			overflowed = true
 		}
-		// Add line at bottom
-		for i := 190; i < 200; i++ {
-			if forceSolid || rand.Intn(8) != 1 {
-				boardMatrix[i].state = 1
-				boardMatrix[i].baseColor = getColor(1)
+	}
+	if overflowed {
+		gameOver()
+	} else {
+		for i := 0; i < count; i++ {
+			// Move all lines up
+			for i := 10; i < 200; i++ {
+				boardMatrix[i-10] = boardMatrix[i]
+				boardMatrix[i].state = 0
+			}
+			// Add line at bottom
+			for i := 190; i < 200; i++ {
+				if forceSolid || rand.Intn(8) != 1 {
+					boardMatrix[i].state = 1
+					boardMatrix[i].baseColor = getColor(1)
+				}
 			}
 		}
 	}
@@ -244,7 +264,7 @@ func gameUpdate() {
 
 	if gameMode == endless {
 		if t%60 == 0 {
-			if stillPossibleResult {
+			if stillPossibleResult && !gameOverResult {
 				endlessCountdown--
 				if endlessCountdown == 0 {
 					AddLines(1, false)
@@ -348,9 +368,9 @@ func gameUpdate() {
 		}
 		redrawBoardImage = true
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		stillPossibleResult = stillPossible()
-	}
+	//if inpututil.IsKeyJustPressed(ebiten.KeyT) {
+	//	stillPossibleResult = stillPossible()
+	//}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
 		if gameMode == puzzle {
@@ -394,15 +414,6 @@ func gameUpdate() {
 func gameDraw(screen *ebiten.Image) {
 	// Frames
 	drawOutlinedRect(screen, 63+float32(shakeX), 2, 71, 141, getColor(3), getColor(0))
-	if stillPossibleResult {
-		if gameMode == puzzle {
-			drawCenteredText(screen, levelHint, 63+35+shakeX, 16, getColor(1))
-		} else if gameMode == endless {
-			drawCenteredText(screen, fmt.Sprint(endlessCountdown), 63+35+shakeX, 16, getColor(1))
-		}
-	} else {
-		drawCenteredText(screen, "Press R,to reset", 63+35+shakeX, 16, getColor(4))
-	}
 
 	drawOutlinedRect(screen, 23, 2, 34, 32, getColor(3), getColor(0))
 	drawOutlinedRect(screen, 23, 33, 34, 110, getColor(3), getColor(0))
@@ -452,6 +463,21 @@ func gameDraw(screen *ebiten.Image) {
 	dio = &ebiten.DrawImageOptions{}
 	dio.GeoM.Translate(64+float64(shakeX), 3)
 	screen.DrawImage(boardImage, dio)
+
+	if stillPossibleResult && !gameOverResult {
+		if gameMode == puzzle {
+			drawCenteredText(screen, levelHint, 63+35+shakeX, 16, getColor(1))
+		} else if gameMode == endless {
+			drawCenteredText(screen, fmt.Sprint(endlessCountdown), 63+35+shakeX, 16, getColor(2))
+			drawCenteredText(screen, fmt.Sprint(score), 63+35+shakeX, 24, getColor(2))
+		}
+	} else {
+		if gameMode == puzzle {
+			drawCenteredText(screen, fmt.Sprint("Press R,to reset"), 63+35+shakeX, 16, getColor(4))
+		} else if gameMode == endless {
+			drawCenteredText(screen, fmt.Sprint("Press R,to reset,,score:,", score), 63+35+shakeX, 16, getColor(4))
+		}
+	}
 }
 
 func drawShape(screen *ebiten.Image, posX int, posY int, scale float32, shapeID int, shapeRotation int, checkValid bool, offsetX float32, offsetY float32) {
@@ -487,6 +513,10 @@ func extractShape(posX int, posY int, shapeID int, shapeRotation int) {
 		}
 		soundPlay(sfx_extracted)
 		PopShape()
+		if gameMode == endless {
+			score += 16
+		}
+		score += 10
 	} else {
 		shake = 0.33
 		soundPlay(sfx_blocked)
@@ -597,6 +627,6 @@ func stillPossible() bool {
 		}
 	}
 	fmt.Println("Still possible? NO")
-	soundPlay(sfx_game_over)
+	gameOver()
 	return false
 }
