@@ -291,6 +291,11 @@ func gameUpdate() {
 	}
 	_, dx := ebiten.Wheel()
 	if dx != 0 {
+		if dx > 0 {
+			dx = 1
+		} else {
+			dx = -1
+		}
 		shapeRotation += int(-dx)
 		if shapeRotation < 0 {
 			shapeRotation = 3
