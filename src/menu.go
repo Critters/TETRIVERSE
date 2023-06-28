@@ -28,8 +28,27 @@ func menuInit() {
 	//logicInit(uiVisualMatrix)
 }
 
+// Squares in the background thing
+var menuBackground []float32 = make([]float32, 3040)
+
 // W & S change which menu item is highlighted
 func menuUpdate() {
+	var cursorX, cursorY = ebiten.CursorPosition()
+
+	// Menu Background
+	v := int(cursorX/9) + ((cursorY / 9) * 160)
+	if v < 0 {
+		v = 0
+	} else if v >= len(menuBackground) {
+		v = len(menuBackground) - 1
+	}
+	menuBackground[v] = 0.25
+	for i := range menuBackground {
+		if menuBackground[i] > 0 {
+			menuBackground[i] -= 0.01
+		}
+	}
+
 	// Keyboard
 	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
 		highlighted--
@@ -38,7 +57,6 @@ func menuUpdate() {
 		highlighted++
 	}
 	// Mouse
-	var cursorX, cursorY = ebiten.CursorPosition()
 	clicked := inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0)
 	if cursorX > 54 && cursorX < 110 {
 		if cursorY > 52 && cursorY < 62 {
@@ -81,6 +99,19 @@ func menuUpdate() {
 }
 
 func menuDraw(screen *ebiten.Image) {
+	// Menu Background
+	for i := range menuBackground {
+		if menuBackground[i] > 0 {
+			colA := getColor(0)
+			colB := getColor(1)
+			colC := color.NRGBA{
+				uint8(lerp(float32(colA.R), float32(colB.R), menuBackground[i])),
+				uint8(lerp(float32(colA.G), float32(colB.G), menuBackground[i])),
+				uint8(lerp(float32(colA.B), float32(colB.B), menuBackground[i])), 255}
+			vector.DrawFilledRect(screen, float32((i%160)*9), float32(((i/160)%160)*9), 7, 7, colC, false)
+		}
+	}
+
 	text.Draw(screen, "TETRI", fontEarlyGameBoyLarge, 3, 32, getColor(3))
 	text.Draw(screen, "VERSE", fontEarlyGameBoyLarge, 82, 32, getColor(4))
 
@@ -139,13 +170,15 @@ func menuDraw(screen *ebiten.Image) {
 	vector.DrawFilledCircle(screen, float32(dotX-8), float32(dotY-3000), 4, getColor(3), false)
 
 	// The visualization
-	var visX int = 56
-	var visY int = 112
+	var visX int = 54
+	var visY int = 108
 	var dio *ebiten.DrawImageOptions = &ebiten.DrawImageOptions{}
 	dio.GeoM.Translate(float64(visX), float64(visY))
 
 	for i := 0; i < 18; i++ {
-		drawBlock(uiVisualImage, float32((i%6)*9), float32(((i/6)%6)*9), uiVisualMatrix[i])
+		if uiVisualMatrix[i] > 0 {
+			drawBlock(uiVisualImage, float32((i%6)*9), float32(((i/6)%6)*9), uiVisualMatrix[i])
+		}
 	}
 
 	screen.DrawImage(uiVisualImage, dio)

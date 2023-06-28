@@ -409,7 +409,7 @@ func gameDraw(screen *ebiten.Image) {
 	//text.Draw(screen, "NEXT", fontEarlyGameBoy, 8, 31, getColor(1))
 
 	if redrawBoardImage {
-		vector.DrawFilledRect(screen, 0, 0, 6, 6, getColor(4), false)
+		//vector.DrawFilledRect(screen, 0, 0, 6, 6, getColor(4), false)
 		// Board
 		boardImage.Clear()
 		for i := 0; i < 200; i++ {
