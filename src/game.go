@@ -216,6 +216,10 @@ func NextLevel() {
 var oldX, oldY, endlessCountdown, endlessLinesAdded int
 
 func gameUpdate() {
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+		switchScreen(0)
+		return
+	}
 	t++
 
 	if shake > 0 {

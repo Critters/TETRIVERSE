@@ -11,17 +11,10 @@ func creditsInit() {
 }
 
 func creditsUpdate() {
-	// Mouse
-	//var cursorX, cursorY = ebiten.CursorPosition()
 	clicked := inpututil.IsMouseButtonJustPressed(ebiten.MouseButton0)
-	//if cursorX > 0 && cursorX < 16 {
-	//	if cursorY > 0 && cursorY < 16 {
-	if clicked {
+	if clicked || inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		switchScreen(0)
 	}
-	//	}
-	//}
-	// TODO: Add keyboard support
 }
 
 func creditsDraw(screen *ebiten.Image) {
@@ -34,4 +27,6 @@ func creditsDraw(screen *ebiten.Image) {
 
 	text.Draw(screen, "Tech:", fontTkachevica, 6, 50, getColor(1))
 	text.Draw(screen, "Golang / Ebitengine", fontTkachevica, 64, 50, getColor(2))
+
+	text.Draw(screen, "[ESC] Back:", fontTkachevica, 6, 70, getColor(4))
 }

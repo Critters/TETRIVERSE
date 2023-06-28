@@ -31,6 +31,7 @@ const (
 //go:embed assets/EarlyGameBoy.ttf
 var fontEarlyGameBoy_embed []byte
 var fontEarlyGameBoy font.Face
+var fontEarlyGameBoyLarge font.Face
 
 //go:embed assets/Tkachevica-4pxRegular.ttf
 var fontTkachevica_embed []byte
@@ -93,6 +94,14 @@ func uiInit() {
 	fontEarlyGameBoy, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    8,
 		DPI:     dpi,
+		Hinting: font.HintingVertical,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fontEarlyGameBoyLarge, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    16,
+		DPI:     72,
 		Hinting: font.HintingVertical,
 	})
 	if err != nil {

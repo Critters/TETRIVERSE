@@ -45,23 +45,23 @@ func menuUpdate() {
 			highlighted = 0
 			if clicked {
 				switchScreen(1)
+				return
 			}
 		}
 		if cursorY > 61 && cursorY < 74 {
 			highlighted = 1
 			if clicked {
 				switchScreen(2)
+				return
 			}
 		}
 		if cursorY > 73 && cursorY < 86 {
 			highlighted = 2
 			if clicked {
 				switchScreen(3)
+				return
 			}
 		}
-		//if cursorY > 85 && cursorY < 98 {
-		//	highlighted = 2
-		//}
 	}
 	// Wraps around when pressing W on the top menu item
 	if highlighted < 0 {
@@ -74,9 +74,16 @@ func menuUpdate() {
 		lastHighlighted = highlighted
 		soundPlay(sfx_menu)
 	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		switchScreen(highlighted + 1)
+	}
 }
 
 func menuDraw(screen *ebiten.Image) {
+	text.Draw(screen, "TETRI", fontEarlyGameBoyLarge, 3, 32, getColor(3))
+	text.Draw(screen, "VERSE", fontEarlyGameBoyLarge, 82, 32, getColor(4))
+
 	// The four options: Puzzle, Arcade, Options, Credits
 	var col color.NRGBA = getColor(1)
 	var dotX int = 60
