@@ -43,15 +43,15 @@ Windows Build WASM: $Env:GOOS='js';$Env:GOARCH='wasm';go build -ldflags="-s -w" 
 - [x] Hook up play menu item
 - [x] Credits screen
 - [x] SoundFX
-- [ ] Game over if line hits top in endless mode
-- [ ] More single blocks in endless mode
+- [x] Game over if line hits top in endless mode
+- [x] Add single block "shape"
+- [x] More single blocks in endless mode
 - [ ] Single block can't go all the way to the left in endless mode
-- [ ] Add single block "shape"
-- [ ] Add new lines
-- [ ] Score
+- [x] Add new lines
+- [x] Score
 - [ ] Holding key jogs shape
 - [ ] Help screen
-- [ ] Logo
+- [x] Logo
 
 ## Make pretty
 - [x] Fade left behind by shapes moving up
