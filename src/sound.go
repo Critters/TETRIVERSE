@@ -88,7 +88,7 @@ func soundInit() {
 
 	sfx_winner = make([]*audio.Player, 1)
 	for i := 0; i < 1; i++ {
-		tmpDecoded, _ := vorbis.DecodeWithSampleRate(48000, bytes.NewReader(sfx_winner_byte))
+		tmpDecoded, _ := vorbis.DecodeWithSampleRate(44100, bytes.NewReader(sfx_winner_byte))
 		sfx_winner[i], _ = audioContext.NewPlayer(tmpDecoded)
 		sfx_winner[i].SetVolume(0.5)
 	}
