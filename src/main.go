@@ -18,11 +18,11 @@ const (
 	gamePuzzleScreen
 	gameEndlessScreen
 	creditsScreen
-	overScreen
+	winnerScreen
 )
 
 func switchScreen(screen int) {
-	fmt.Println("switchScreen()")
+	fmt.Printf("switchScreen(%d)\n", screen)
 	switch screen {
 	case 1:
 		soundPlay(sfx_start)
@@ -32,6 +32,8 @@ func switchScreen(screen int) {
 		gameInit(1)
 	case 3:
 		creditsInit()
+	case 4:
+		winnerInit()
 	}
 	currentScreen = screen
 }
@@ -50,6 +52,8 @@ func (g *Game) Update() error {
 		gameUpdate()
 	case creditsScreen:
 		creditsUpdate()
+	case winnerScreen:
+		winnerUpdate()
 	}
 	return nil
 }
@@ -63,6 +67,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		gameDraw(screen)
 	case creditsScreen:
 		creditsDraw(screen)
+	case winnerScreen:
+		winnerDraw(screen)
 	}
 	//drawDebug(screen)
 	drawFooter(screen)

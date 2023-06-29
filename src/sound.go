@@ -8,6 +8,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 )
 
+/* This should probably just load in all files of type .ogg and then I should put them all in
+a single large pool and reference them by file name, vs manually creating a pair of variables for each one*/
+
 var audioContext *audio.Context
 
 //go:embed assets/blocked.ogg
@@ -33,6 +36,10 @@ var sfx_game_over []*audio.Player
 //go:embed assets/start.ogg
 var sfx_start_byte []byte
 var sfx_start []*audio.Player
+
+//go:embed assets/winner.ogg
+var sfx_winner_byte []byte
+var sfx_winner []*audio.Player
 
 func soundInit() {
 	if audioContext == nil {
@@ -77,6 +84,13 @@ func soundInit() {
 		tmpDecoded, _ := vorbis.DecodeWithSampleRate(48000, bytes.NewReader(sfx_start_byte))
 		sfx_start[i], _ = audioContext.NewPlayer(tmpDecoded)
 		sfx_start[i].SetVolume(0.5)
+	}
+
+	sfx_winner = make([]*audio.Player, 1)
+	for i := 0; i < 1; i++ {
+		tmpDecoded, _ := vorbis.DecodeWithSampleRate(48000, bytes.NewReader(sfx_winner_byte))
+		sfx_winner[i], _ = audioContext.NewPlayer(tmpDecoded)
+		sfx_winner[i].SetVolume(0.5)
 	}
 }
 

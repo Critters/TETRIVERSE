@@ -91,6 +91,7 @@ func gameInit(m modes) {
 	fmt.Printf("gameInit(%v)\n", gameMode)
 
 	currentLevel = 0
+
 	boardMatrix = [200]boardBlock{}
 	possibleShapes = make([]shapes, 7)
 	possibleShapes[0] = [4]shape{
@@ -229,8 +230,12 @@ func PopShape() {
 }
 
 func NextLevel() {
-	LoadLevel(currentLevel + 1)
-	gameState = 0
+	if gameMode == puzzle && currentLevel == 9 {
+		switchScreen(winnerScreen)
+	} else {
+		LoadLevel(currentLevel + 1)
+		gameState = 0
+	}
 }
 
 var oldX, oldY, endlessCountdown, endlessLinesAdded int
